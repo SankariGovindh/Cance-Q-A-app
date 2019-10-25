@@ -11,6 +11,12 @@ app = Flask(__name__)
 DB_NAME = 'inventory'
 
 # MOVE CONFIGURATION VARIABLES OUT OF THIS FILE
+# config = {
+#     'user': '<INSERT YOUR USERNAME HERE>',
+#     'password': '<INSERT YOUR PASSWORD HERE>',
+#     'host': '127.0.0.1',
+#     'database': DB_NAME
+# }
 config = {
     'user': 'justinho',
     'password': 'GRIDS',
@@ -18,12 +24,68 @@ config = {
     'database': DB_NAME
 }
 
+@app.route('/get_faqs', methods=['GET'])
+def get_faqs():
+    """Return a JSON response of the top 10 most frequently asked questions (FAQs)."""
+
+    # connect to database
+    print("Retrieving FAQs...")
+    conn, cursor = connect(config)
+
+    # get question from database
+    query_for_questions = ("SELECT question_id, user_id, title, date_updated, source, num_comments FROM questions LIMIT 10")
+    cursor.execute(query_for_questions)
+
+    results_questions = cursor.fetchall()
+
+    # parse result into JSON
+    response = {}    
+    for idx, result in enumerate(results_questions):        
+
+        # get comments associated with the question_id
+        query_for_comments = ("SELECT user_id, comment_text, is_anonymous, source FROM comments WHERE question_id=%s") 
+        question_id = result[0]       
+        cursor.execute(query_for_comments, (question_id, ))
+        comments_results = cursor.fetchall()
+        comments = {}
+        for idx, comment in enumerate(comments_results):
+            user_id, comment_text, is_anonymous, source = \
+                comment[0], comment[1], comment[2], comment[3]            
+            comments[idx] = {
+                'user_id': user_id,
+                'comment_text': comment_text,
+                'is_anonymous': is_anonymous,
+                'source': source
+            }
+        
+        # add question data into response
+        question_id, user_id, title, date_updated, source, num_comments = \
+            result[0], result[1], result[2], result[3], result[4], result[5]
+        response[idx] = {
+            'question_id': question_id,
+            'user_id': user_id,
+            'title': title,
+            'date_updated': date_updated,
+            'source': source,
+            'comments': comments,
+            'num_comments': num_comments
+        }
+
+    # close connection to database
+    cursor.close()
+    conn.close()
+
+    print("Successfully fetched FAQs.")
+
+    return jsonify(response)
+
 
 @app.route('/create_user', methods=['POST'])
 def create_user():
     """Create a user."""
 
     print("TODO")
+
 
 @app.route('/delete_user', methods=['POST'])
 def delete_user():
@@ -127,6 +189,7 @@ def get_question():
     question_id = request.args.get('question_id')
 
     # connect to database
+    print("Connecting to db...")
     conn, cursor = connect(config)
 
     # get question from database
