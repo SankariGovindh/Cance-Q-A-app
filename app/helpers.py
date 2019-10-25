@@ -1,5 +1,6 @@
 # Helper functions for app.py
 
+from datetime import datetime
 import mysql.connector
 from mysql.connector import errorcode
 
@@ -40,3 +41,9 @@ def create_database(cursor, DB_NAME):
     except mysql.connector.Error as err:
         print("Failed creating database: {}".format(err))
         exit(1)
+
+
+def get_datetime():
+    """Returns the current date and time in as a string."""
+
+    return str(datetime.now())

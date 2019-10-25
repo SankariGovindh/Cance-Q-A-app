@@ -1,9 +1,9 @@
 from flask import Flask, jsonify, request
 import mysql.connector
 from mysql.connector import errorcode
-import json
 
-from helpers import connect, create_database
+
+from helpers import connect, create_database, get_datetime
 from tables import tables
 
 app = Flask(__name__)
@@ -51,7 +51,11 @@ def add_comment():
 
 @app.route('/get_comments', methods=['GET'])
 def get_comments():
-    """Return the comments associated with a specified question_id in JSON format."""
+    """Return the comments associated with a specified question_id in JSON format.
+    
+    Precondition(s):
+    - question_id is not None
+    """
     
     # get query parameters
     question_id = request.args.get('question_id')
@@ -73,11 +77,19 @@ def update_comment():
 
 @app.route('/add_question', methods=['POST'])
 def add_question():
-    """Add a question to the database."""
+    """Add a question to the database.
+    
+    Precondition(s): 
+    - user_id is not None
+    - question_text is not None
+    - is_anon is not None    
+    """
 
     # get query parameters
-    question_id = request.args.get('question_id')
+    user_id = request.args.get('user_id')
     question_text = request.args.get('question_text')
+    is_anon = request.args.get('is_anonymous')
+    source = request.args.get('source')
 
     # connect to database
     conn, cursor = connect(config)
@@ -85,8 +97,12 @@ def add_question():
     add_question = ("INSERT INTO questions "
                     "(user_id, title, date_created, date_updated, is_anonymous, source) "
                     "VALUES (%s, %s, %s, %s, %s, %s)")
-    # UPDATE QUESTION_DATA PARAMETER
-    question_data = (100, question_text, '2019-01-01', '2019-10-24', 1, 'SideEffects App')
+    
+    # prepare 'insert' query
+    if source is None:
+        question_data = (user_id, question_text, get_datetime(), get_datetime(), is_anon, 'Side Effects App')
+    else:
+        question_data = (user_id, question_text, get_datetime(), get_datetime(), is_anon, source)
 
     # add question to database
     cursor.execute(add_question, question_data)
@@ -96,12 +112,15 @@ def add_question():
     cursor.close()
     conn.close()
 
+    # return jsonify({'success': True}), 200, {'ContentType': 'application/json'}
+    return jsonify(success=True)
+
 
 @app.route('/get_question', methods=['GET'])
 def get_question():
     """Return a question from the database with id 'question_id' in JSON format.
 
-    Returns a JSON object containing the question text of the given question_id.
+    Returns a JSON response containing the question text of the given question_id.
     """
 
     # get query parameters
@@ -160,8 +179,3 @@ if __name__ == '__main__':
     
     cursor.close()
     conn.close()
-
-
-    # sample code for demo
-    # add_question("ABC")
-    get_question()
