@@ -16,3 +16,5 @@ pip install mysql-connector-python
 ```
 flask run
 ```
+6. Download Postman from https://www.getpostman.com/downloads/
+7. Now you should be able to test API requests via Postman and see any associated changes in MySQL workbench.
