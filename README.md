@@ -20,3 +20,13 @@ flask run
 ```
 8. Download Postman from https://www.getpostman.com/downloads/
 9. Now you should be able to test API requests via Postman and see any associated changes in MySQL workbench.
+
+## Backend NLP 
+
+The backend NLP folder contains the code that parse the user string. 
+
+1) Read the user string passed as parameter via the API call 
+2) Pre-process the query string and find the feature vector 
+3) Match similarity with that of the DB content, find the best match 
+4) Respond back with the comments corresponding to the best match 
+
