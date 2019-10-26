@@ -2,7 +2,6 @@ from flask import Flask, jsonify, request
 import mysql.connector
 from mysql.connector import errorcode
 
-
 from helpers import connect, create_database, get_datetime
 from tables import tables
 
@@ -40,18 +39,19 @@ def get_faqs():
 
     # parse result into JSON
     response = {}    
-    for idx, result in enumerate(results_questions):        
+    for result in results_questions:
+
+        question_id = result[1]
 
         # get comments associated with the question_id
-        query_for_comments = ("SELECT user_id, comment_text, is_anonymous, source FROM comments WHERE question_id=%s") 
-        question_id = result[0]       
+        query_for_comments = ("SELECT comment_id, user_id, comment_text, is_anonymous, source FROM comments WHERE question_id=%s")                
         cursor.execute(query_for_comments, (question_id, ))
         comments_results = cursor.fetchall()
         comments = {}
-        for idx, comment in enumerate(comments_results):
-            user_id, comment_text, is_anonymous, source = \
-                comment[0], comment[1], comment[2], comment[3]            
-            comments[idx] = {
+        for comment in comments_results:
+            comment_id, user_id, comment_text, is_anonymous, source = \
+                comment[0], comment[1], comment[2], comment[3], comment[4]
+            comments[comment_id] = {
                 'user_id': user_id,
                 'comment_text': comment_text,
                 'is_anonymous': is_anonymous,
@@ -61,7 +61,7 @@ def get_faqs():
         # add question data into response
         question_id, user_id, title, date_updated, source, num_comments = \
             result[0], result[1], result[2], result[3], result[4], result[5]
-        response[idx] = {
+        response[question_id] = {
             'question_id': question_id,
             'user_id': user_id,
             'title': title,
