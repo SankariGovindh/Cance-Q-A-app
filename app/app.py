@@ -41,7 +41,7 @@ def get_faqs():
     response = {}    
     for result in results_questions:
 
-        question_id = result[1]
+        question_id = result[0]        
 
         # get comments associated with the question_id
         query_for_comments = ("SELECT comment_id, user_id, comment_text, is_anonymous, source FROM comments WHERE question_id=%s")                
@@ -52,6 +52,7 @@ def get_faqs():
             comment_id, user_id, comment_text, is_anonymous, source = \
                 comment[0], comment[1], comment[2], comment[3], comment[4]
             comments[comment_id] = {
+                'comment_id': comment_id,
                 'user_id': user_id,
                 'comment_text': comment_text,
                 'is_anonymous': is_anonymous,
