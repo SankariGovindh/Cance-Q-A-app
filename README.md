@@ -1,5 +1,5 @@
 # Side Effects Management
-
+![](/backend_architecture_diagram.png)
 
 ## Getting Started
 1. Install the required packages.
