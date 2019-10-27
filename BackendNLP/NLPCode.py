@@ -40,9 +40,9 @@ def posTagging(processedQuery):
     return processedQuery
 
 def bagOfWords(preProcessed):
-    iterable = ['husband', 'tri', 'chemo', 'morn', 'platelet', 'count', 'low', 'needle', 'low', 'stay', 'posit', 'get', 'hard', 'stay', 'posit', 'cours', 'sad', 'front', 'el', 'ani', 'input', 'blood', 'level', 'allow', 'eat', 'much', 'potassium', 'appreci', 'input']
+    ##iterable = ['husband', 'tri', 'chemo', 'morn', 'platelet', 'count', 'low', 'needle', 'low', 'stay', 'posit', 'get', 'hard', 'stay', 'posit', 'cours', 'sad', 'front', 'el', 'ani', 'input', 'blood', 'level', 'allow', 'eat', 'much', 'potassium', 'appreci', 'input']
     count_vect = CountVectorizer()
-    X_counts = count_vect.fit_transform(processedQuery)
+    X_counts = count_vect.fit_transform(preProcessed)
     print(vectorizer.get_feature_names())
 
 
@@ -59,10 +59,10 @@ processedQuery = lemmatizing(processedQuery)
 processedQuery = posTagging(processedQuery)
 print(processedQuery)
 
-##featue vector generation - using bag of words and print features 
+##featue vector generation - using bag of words / n-grams   
 
-##feature vector generation - using n-gram and print features 
+##feature vector generation - using TF-IDF - perform TF-IDF for the data in the database - store the same in the database (separate table) - assign the values directly 
 
-##feature vector generation - using TF-IDF and print features 
+##use FastText later for the new words to train the model 
 
-##cosine similarity 
+##cosine similarity - between the string in the database and the user query 
