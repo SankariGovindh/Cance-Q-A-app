@@ -1,5 +1,5 @@
 # questions/routes.py
-from flask import Blueprint, request, make_response
+from flask import Blueprint, request, make_response, jsonify
 from flask import current_app as app
 from ..models import Question
 from datetime import datetime
@@ -42,6 +42,7 @@ def add_question():
         if source is None:
             source = "SideEffects App" # default source       
 
+        # create new question object
         new_question = Question(user_id=user_id,
                         title=title,
                         content=content,
@@ -67,22 +68,20 @@ def get_question():
     # get query parameters
     question_id = request.args.get('question_id')
 
-    # connect to database
-    print("Connecting to db...")
-    conn, cursor = connect(config)
+    # query for question
+    question = Question.query.get(question_id)
 
-    # get question from database
-    query = ("SELECT title FROM questions "
-             "WHERE question_id=%s")
-    cursor.execute(query, (question_id, ))
+    # format response
+    response = []
+    response.append({
+        "question_id": question_id,
+        "question_user_id": question.user_id,
+        "question_title": question.title,
+        "question_content": question.content,
+        "question_date_updated": question.date_updated,
+        "question_source": question.source,
+        "question_is_anon": question.is_anonymous,
+        "question_num_comments": question.num_comments
+    })
 
-    # do something with retrieved question
-    # for question_text in cursor:
-    #     print("{}: {}".format(question_id, question_text))
-    result = cursor.fetchone()
-
-    # close connection to database
-    cursor.close()
-    conn.close()
-
-    return jsonify(result)
+    return jsonify(response)
