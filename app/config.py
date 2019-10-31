@@ -11,7 +11,8 @@ def create_config_object(env_setting):
     new_config = Config()
     with env.prefixed(env_setting):
         new_config.SQLALCHEMY_DATABASE_URI = env.str("SQLALCHEMY_DATABASE_URI")
-        new_config.DEBUG = env.bool("DEBUG", default=False)
+        new_config.DEBUG = env.bool("FLASK_DEBUG", default=True)
+        new_config.FLASK_ENV = env.str("ENV", "development")
         new_config.TESTING = env.bool("TESTING", default=False)
     return new_config
 
