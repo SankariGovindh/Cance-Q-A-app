@@ -1,13 +1,13 @@
 # users/routes.py
-from flask import Blueprint, request, make_response
+from flask import Blueprint, request, make_response, jsonify
 from flask import current_app as app
 from ..models import User
 from datetime import datetime
-# from .. import db
+from .. import db
 from flask_sqlalchemy import SQLAlchemy
 
 
-db = SQLAlchemy()
+# db = SQLAlchemy()
 
 
 # set up a blueprint
@@ -47,16 +47,51 @@ def add_user():
                         #  headers=headers)
 
 
-@users_bp.route('/delete_user', methods=['POST'])
+@users_bp.route("/get_user", methods=["GET"])
+def get_user():
+    """Get user information."""
+
+    # get arguments
+    user_id = request.args.get("user_id")
+
+    # get user info
+    user = User.query.get(user_id)
+
+    # construct response
+    response = []
+    response.append({
+        "user_id": user.user_id,                
+        "user_first_name": user.first_name,
+        "user_last_name": user.last_name,
+        "user_username": user.username,
+        "user_email": user.email,
+        "user_date_created": user.date_created
+    })
+
+    return jsonify(response)
+
+
+@users_bp.route("/delete_user", methods=["DELETE"])
 def delete_user():
-    """Delete user from database."""
+    """Delete user from database.
+    
+    Precondition: user_id exists in the 'user' table
+    """
 
-    print("TODO")
-    return make_response("SAMPLE delete user", 200)
+    # get arguments
+    user_id = request.args.get("user_id")
+
+    # delete user
+    user = User.query.get(user_id)
+    db.session.delete(user)
+    # User.query.filter_by(user_id=user_id).delete()
+    db.session.commit()    
+    return make_response(f"{user} successfully deleted.", 200)
 
 
-@users_bp.route('/update_user', methods=['PUT'])
+@users_bp.route("/update_user", methods=["PUT"])
 def update_user():
     """Update details of a user."""
 
     print("TODO")
+    return make_response(f"{user} successfully updated.", 200)
