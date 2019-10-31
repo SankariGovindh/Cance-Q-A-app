@@ -1,11 +1,9 @@
 # comments/routes.py
 from flask import Blueprint, request
 from flask import current_app as app
-# from .. import db
-
 from flask_sqlalchemy import SQLAlchemy
+from .. import db
 
-db = SQLAlchemy()
 
 # set up a blueprint
 comments_bp = Blueprint('comments_bp', __name__)

@@ -1,13 +1,10 @@
 # users/routes.py
 from flask import Blueprint, request, make_response, jsonify
 from flask import current_app as app
+from flask_sqlalchemy import SQLAlchemy
 from ..models import User
 from datetime import datetime
 from .. import db
-from flask_sqlalchemy import SQLAlchemy
-
-
-# db = SQLAlchemy()
 
 
 # set up a blueprint

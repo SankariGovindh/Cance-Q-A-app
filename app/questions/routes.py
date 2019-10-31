@@ -1,14 +1,11 @@
 # questions/routes.py
 from flask import Blueprint, request, make_response, jsonify
 from flask import current_app as app
+from flask_sqlalchemy import SQLAlchemy
 from ..models import Question, Comment
 from datetime import datetime
-# from .. import db
+from .. import db
 
-from flask_sqlalchemy import SQLAlchemy
-
-
-db = SQLAlchemy()
 
 # set up a blueprint
 questions_bp = Blueprint("questions_bp", __name__)

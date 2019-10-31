@@ -1,8 +1,7 @@
 # models.py
-# from . import db
-
+from . import db
 from flask_sqlalchemy import SQLAlchemy
-db = SQLAlchemy()
+
 
 class User(db.Model):
     user_id = db.Column(db.Integer, primary_key=True)
