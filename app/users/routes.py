@@ -2,6 +2,7 @@
 from flask import Blueprint, request, make_response, jsonify
 from flask import current_app as app
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 from ..models import User
 from datetime import datetime
 from .. import db
@@ -19,8 +20,8 @@ def add_user():
     first_name = request.args.get("first_name")
     last_name = request.args.get("last_name")
     username = request.args.get("username")
-    password = request.args.get("password")
-    email = request.args.get("email")
+    password = generate_password_hash(request.args.get("password"))
+    email = request.args.get("email") # add email format verification?
 
     if first_name and last_name and username and email and password:
 
@@ -44,8 +45,8 @@ def add_user():
                         #  headers=headers)
 
 
-@users_bp.route("/get_user", methods=["GET"])
-def get_user():
+@users_bp.route("/get_user_info", methods=["GET"])
+def get_user_info():
     """Get user information."""
 
     # get arguments
@@ -80,15 +81,55 @@ def delete_user():
 
     # delete user
     user = User.query.get(user_id)
-    db.session.delete(user)
-    # User.query.filter_by(user_id=user_id).delete()
+    db.session.delete(user)    
     db.session.commit()    
     return make_response(f"{user} successfully deleted.", 200)
 
 
 @users_bp.route("/update_user", methods=["PUT"])
 def update_user():
-    """Update details of a user."""
+    """Update details of a user.
+    
+    Precondition(s):
+    - user_id is not null
+    """
 
-    print("TODO")
+    # get arguments
+    user_id = request.args.get("user_id")
+    first_name = request.args.get("first_name")
+    last_name = request.args.get("last_name")
+    username = request.args.get("username")
+    email = request.args.get("email")
+    password = request.args.get("password")
+
+    # get desired user
+    user  = User.query.get(user_id)
+
+    # get details about current user in database
+    curr_username = user.username
+    curr_email = user.email
+
+    # make sure username don't already exist in database (excluding user's current username)
+    if username != curr_username and User.query.filter_by(username=username).count() > 0:
+        return make_response(f"Unable to update user. Username \"{username}\" is already taken.")
+
+    # make sure email don't already exist in database (excluding user's current email)
+    if email != curr_email and User.query.filter_by(email=email).count() > 0:
+        return make_response(f"Unable to update email. \"{email}\" is already associated with another account.")
+
+    # update user details
+    if len(first_name) != 0 and first_name is not None:
+        user.first_name = first_name
+    if len(last_name) != 0 and last_name is not None:
+        user.last_name = last_name    
+    if len(username) != 0 and username is not None:
+        user.username = username    
+    if len(email) != 0 and email is not None: # add email format verification here or in client-side code?
+        user.email = email
+    if len(password) != 0 and password is not None:
+        user.password = generate_password_hash(password)
+    
+    # update database entry
+    db.session.commit()
+    
     return make_response(f"{user} successfully updated.", 200)
