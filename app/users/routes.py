@@ -17,6 +17,8 @@ users_bp = Blueprint('users_bp', __name__)
 @users_bp.route("/add_user", methods=["POST"])
 def add_user():
     """Create a user."""
+
+    # get arguments
     first_name = request.args.get("first_name")
     last_name = request.args.get("last_name")
     username = request.args.get("username")
