@@ -9,7 +9,7 @@ pip3 install -r requirements.txt
 2. Install MySQL and MySQL workbench from https://dev.mysql.com/downloads/installer/ and https://dev.mysql.com/downloads/workbench/
 3. Create a username and password in MySQL workbench to access the database (https://dev.mysql.com/doc/workbench/en/wb-mysql-connections-navigator-management-users-and-privileges.html). 
 4. Download Postman from https://www.getpostman.com/downloads/
-5. Update your MySQL credentials in ~/app/config.py
+5. Update your MySQL credentials in ~/app/.env
 6. Navigate to the top-level of the project directory.
 7. On the command line, type
 ```
