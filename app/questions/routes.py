@@ -113,7 +113,7 @@ def get_faqs():
 
         # add question data into response        
         response.append({
-            "question_id": question.question_id,
+            "id": question.question_id,
             "question_user_id": question.user_id,
             "question_title": question.title,
             "question_date_updated": question.date_updated,
