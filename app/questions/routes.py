@@ -118,9 +118,12 @@ def get_faqs():
             "question_title": question.title,
             "question_date_updated": question.date_updated,
             "question_source": question.source,
+            "question_content": question.content,
             "question_num_comments": question.num_comments,
+            "question_is_anon": question.is_anonymous,
             "comment_content": comment_content,
             "comment_source": comment_source,
+            "comment_date_updated": comment_date_updated,
             "comment_is_anon": comment_is_anon,
             "comment_user_id": comment_user_id            
         })    
