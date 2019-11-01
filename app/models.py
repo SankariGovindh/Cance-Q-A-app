@@ -1,6 +1,7 @@
 # models.py
 from . import db
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 class User(db.Model):
@@ -9,13 +10,21 @@ class User(db.Model):
     last_name = db.Column(db.String(45), nullable=False)
     username = db.Column(db.String(45), unique=True, nullable=False)    
     email = db.Column(db.String(80), unique=True, nullable=False)
-    password = db.Column(db.String(45), nullable=False)
+    password = db.Column(db.String(200), nullable=False) # length 200 to store hashed password
     date_created = db.Column(db.DateTime, default=db.func.now())
     # cancer_history = db.Column(db.) # SQLAlchemy doesn't have JSON type; https://flask-sqlalchemy.palletsprojects.com/en/2.x/models/
-    gender_id = db.Column(db.Integer) # associate gender_id with gender_table?
-    age = db.Column(db.Integer)
-    cancer_type_id = db.Column(db.Integer) # associate cancer_type_id with cancer_type table?
+    # gender_id = db.Column(db.Integer) # associate gender_id with gender_table?
+    # age = db.Column(db.Integer)
+    # cancer_type_id = db.Column(db.Integer) # associate cancer_type_id with cancer_type table?
     # treatments = alternative to JSON? # SQLAlchemy doesn't have JSON type; https://flask-sqlalchemy.palletsprojects.com/en/2.x/models/
+
+    def set_password(self, password):
+        """Create hashed password."""
+        self.password = generate_password_hash(password, method="sha256")
+
+    def check_password(self, password):
+        """Check hashed password."""
+        return check_password_hash(self.password, password)
 
     def __repr__(self):
         return "<User {}>".format(self.username)

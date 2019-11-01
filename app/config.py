@@ -1,4 +1,3 @@
-import os
 from environs import Env
 
 
@@ -19,6 +18,7 @@ def create_config_object(env_setting):
 
 class Config:
     """Set Flask configuration variables."""
+    # SECRET_KEY=env.str("SECRET_KEY") # IMPORTANT!!!
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_DATABASE_URI = env.str(
         "SQLALCHEMY_DATABASE_URI", default=env.str("DEV_SQLALCHEMY_DATABASE_URI")
