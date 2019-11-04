@@ -25,3 +25,9 @@ The backend NLP folder contains the code that parse the user string.
 2) Pre-process the query string and find the feature vector 
 3) Match similarity with that of the DB content, find the best match 
 4) Respond back with the comments corresponding to the best match 
+
+## AWS Setup Details 
+
+Login Details : username : sankares@usc.edu and password : Cancerbase@2019
+
+Project Name : Project_SideEffects
