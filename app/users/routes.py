@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from ..models import User
 from datetime import datetime
+# from flask_login import login_required
 from .. import db
 
 
@@ -23,12 +24,19 @@ def add_user():
     password = generate_password_hash(request.args.get("password"))
     email = request.args.get("email") # add email format verification?
 
+    # prepare headers for response
+    headers = {"Content-Type": "application/json"}
+
     if first_name and last_name and username and email and password:
 
         # check if a user with this username or email exists already
         existing_user = User.query.filter(User.username == username or User.email == email).first()
-        if existing_user:
-            return make_response(f"{username} ({email}) already exists!")
+        if existing_user:            
+            response = {
+                "message": f"{username} ({email}) already exists!",
+                "success": False
+                        }
+            return jsonify(response), 409, headers
 
         new_user = User(first_name=first_name,
                         last_name=last_name,
@@ -38,14 +46,16 @@ def add_user():
                         date_created=datetime.now()) # create an instance of the User class
         db.session.add(new_user) # adds a new user to the database
         db.session.commit() # commit all changes to the database
-
-    headers = {"Content-Type": "application/json"}
-    return make_response(f"{new_user} successfully created!", 200)
-                        #  200,
-                        #  headers=headers)
+    
+    response = {
+        "message": f"{new_user} successfully created!",
+        "success": True
+    }
+    return jsonify(response), 200, headers    
 
 
 @users_bp.route("/get_user_info", methods=["GET"])
+# @login_required
 def get_user_info():
     """Get user information."""
 
@@ -70,6 +80,7 @@ def get_user_info():
 
 
 @users_bp.route("/delete_user", methods=["DELETE"])
+# @login_required
 def delete_user():
     """Delete user from database.
     
@@ -87,6 +98,7 @@ def delete_user():
 
 
 @users_bp.route("/update_user", methods=["PUT"])
+# @login_required
 def update_user():
     """Update details of a user.
     
@@ -109,13 +121,26 @@ def update_user():
     curr_username = user.username
     curr_email = user.email
 
+    # prepare headers for response
+    headers = {"Content-Type": "application/json"}
+
     # make sure username don't already exist in database (excluding user's current username)
     if username != curr_username and User.query.filter_by(username=username).count() > 0:
-        return make_response(f"Unable to update user. Username \"{username}\" is already taken.")
+        # return make_response(f"Unable to update user. Username \"{username}\" is already taken.")
+        response = {
+            "message": f"Unable to update user. Username \"{username}\" is already taken.",
+            "success": False
+        }
+        return jsonify(response), 409
 
     # make sure email don't already exist in database (excluding user's current email)
     if email != curr_email and User.query.filter_by(email=email).count() > 0:
-        return make_response(f"Unable to update email. \"{email}\" is already associated with another account.")
+        # return make_response(f"Unable to update email. \"{email}\" is already associated with another account.")
+        response = {
+            "message": f"Unable to update email. \"{email}\" is already associated with another account.",
+            "success": False
+        }
+        return jsonify(response), 409
 
     # update user details
     if len(first_name) != 0 and first_name is not None:
@@ -132,4 +157,9 @@ def update_user():
     # update database entry
     db.session.commit()
     
-    return make_response(f"{user} successfully updated.", 200)
+    # return make_response(f"{user} successfully updated.", 200)
+    response = {
+        "message": f"{user} successfully updated.",
+        "success": True
+    }
+    return jsonify(response), 200, headers
