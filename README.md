@@ -36,10 +36,10 @@ Project Name : Project_SideEffects
 Instructions:
 1. Open MySQL Workbench and navigate to the home page (MySQL Connections).
 2. Open a new connection.
-3. Set the "Hostname" field to inventory-1.cs45dfwrhl7w.us-west-1.rds.amazonaws.com
+3. Set the "Hostname" field to "inventory-1.cs45dfwrhl7w.us-west-1.rds.amazonaws.com" (don't include quotes)
 4. Set the "Port" field to 3306
-5. Set the "Username" field to Administrator
-6. In the "Password" field, click "Store in Vault ..." and enter Cancerbase2019 as the password.
+5. Set the "Username" field to "administrator" (don't include quotes)
+6. In the "Password" field, click "Store in Vault ..." and enter "Cancerbase2019" (don't include quotes) as the password.
 7. Click OK to connect.
 
 ## Setting up Amazon RDS (MySQL)
