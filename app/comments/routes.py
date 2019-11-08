@@ -2,6 +2,7 @@
 from flask import Blueprint, request
 from flask import current_app as app
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import login_required
 from .. import db
 
 
@@ -10,6 +11,7 @@ comments_bp = Blueprint('comments_bp', __name__)
 
 
 @comments_bp.route('/add_comment', methods=['POST'])
+# @login_required
 def add_comment():
     """Add comment to the question thread with id 'question_id'."""
 
@@ -20,6 +22,7 @@ def add_comment():
 
 
 @comments_bp.route('/get_comments', methods=['GET'])
+# @login_required
 def get_comments():
     """Return the comments associated with a specified question_id in JSON format.
 
@@ -33,6 +36,7 @@ def get_comments():
 
 
 @comments_bp.route('/update_comment', methods=['PUT'])
+# @login_required
 def update_comment():
     """Update the comment with id 'comment_id' that is associated with the
     question with id 'question_id'.
