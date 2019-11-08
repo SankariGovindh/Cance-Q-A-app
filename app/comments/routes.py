@@ -74,13 +74,12 @@ def get_comments():
                 "question_id": comment.question_id,
                 "content": comment.content,
                 "date_updated": comment.date_updated,
-                "is_anonymous": comment.is_anon,
+                "is_anonymous": comment.is_anonymous,
                 "source": comment.source})
         
         return jsonify(response)
 
     return make_response(f"Unable to return comments due to missing question_id!", 400)
-    # print("TODO")
 
 
 @comments_bp.route('/update_comment', methods=['POST'])
