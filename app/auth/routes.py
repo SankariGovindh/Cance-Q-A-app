@@ -15,7 +15,11 @@ auth_bp = Blueprint('auth_bp', __name__)
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
     """User login page."""
-    return 1
+    response = {
+        "message": "Successful user login.",
+        "user_id": "1"
+    }
+    return jsonify(response), 200
     # # bypass login page if user is already logged in
     # print("current_user: " + str(current_user))
     # print("Is current user authenticated? " + str(current_user.is_authenticated))
