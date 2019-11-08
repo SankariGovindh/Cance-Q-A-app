@@ -13,7 +13,7 @@ questions_bp = Blueprint("questions_bp", __name__)
 
 
 @questions_bp.route("/add_question", methods=["POST"])
-@login_required
+# @login_required
 def add_question():
     """Add a question to the database.
 
@@ -162,24 +162,24 @@ def delete_question():
     question_id = request.args.get("question_id")
 
     # get the question that needs to be deleted
-    delete_q = Question.query.filter_by(question_id=question_id)
+    delete_q = Question.query.filter_by(question_id=question_id).first()
     db.session.delete(delete_q)
 
     db.session.commit()
     return make_response(f"Question successfully deleted!", 200)
 
 
-@questions_bp.route("/update_question", methods=["DELETE"])
+@questions_bp.route("/update_question", methods=["PUT"])
 def update_question():
     # get query parameters
     question_id = request.args.get("question_id")
     new_title = request.args.get("title")
     new_content = request.args.get("content")
     new_date = request.args.get("date_updated")
-    is_anon = request.args.get("is_anonymous")
+    is_anon = int(request.args.get("is_anonymous"))
 
     # get the question that needs to be updated
-    update_q = Question.query.filter_by(question_id=question_id)
+    update_q = Question.query.filter_by(question_id=question_id).first()
     # update the following fields of the question
     update_q.title = new_title
     update_q.content = new_content

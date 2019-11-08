@@ -1,8 +1,9 @@
 # comments/routes.py
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify, make_response
 from flask import current_app as app
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import login_required
+from datetime import datetime
 from ..models import Question, Comment
 from .. import db
 
@@ -20,7 +21,7 @@ def add_comment():
     user_id = request.args.get('user_id')
     question_id = request.args.get('question_id')
     content = request.args.get('content')
-    date_posted = request.args.get('date_posted')
+    date_created = request.args.get('date_created')
     date_updated = request.args.get('date_updated')
     is_anon = int(request.args.get('is_anonymous'))
     source = ('source')
@@ -36,7 +37,7 @@ def add_comment():
         new_comment = Comment(user_id=user_id,
                                 question_id=question_id,
                                 content=content,
-                                date_posted=date_posted,
+                                date_created=date_created,
                                 date_updated=date_updated,
                                 is_anonymous=is_anon,
                                 source=source)
@@ -53,21 +54,29 @@ def add_comment():
 
 
 @comments_bp.route('/get_comments', methods=['GET'])
-# @login_required
 def get_comments():
-    """Return the comments associated with a specified question_id in JSON format.
-
-    Precondition(s):
-    - question_id is not None
-    """
-
-    # get query parameters
-    question_id = request.args.get('question_id')
-
-    # check if question_is is None or not
-    if question_id is not None:
-        # get all comments that is from the question_id
-        comments = Comment.query.filter_by(question_id=question_id).all()
+   """Return the comments associated with a specified question_id in JSON format.
+   Precondition(s):
+   - question_id is not None
+   """
+   # get query parameters
+   question_id = request.args.get('question_id')
+   # check if question_is is None or not
+   if question_id is not None:
+       # get all comments that is from the question_id
+       comments = Comment.query.filter_by(question_id=question_id).all()
+       response = []
+       # put each comment's information in a dict, and append it in a list
+       for comment in comments:
+           response.append({"comment_id": comment.comment_id,
+               "user_id": comment.user_id,
+               "question_id": comment.question_id,
+               "content": comment.content,
+               "date_updated": comment.date_updated,
+               "is_anon": comment.is_anonymous,
+               "source": comment.source})
+       return jsonify(response)
+   return make_response(f"Unable to return comments due to missing question_id!", 400)
 
 
 @comments_bp.route('/update_comment', methods=['PUT'])
@@ -81,15 +90,16 @@ def update_comment():
     # get query parameters
     # question_id = request.args.get('question_id')
     comment_id = request.args.get('comment_id')
-    comment_new = request.args.get('content')
-    date_updated = request.args.get('date_updated')
+    comment_new = request.args.get('content')    
     is_anon = int(request.args.get('is_anonymous'))
 
     # query the comment that need to be updated
-    update = Comment.query.filter_by(comment_id=comment_id)
+    update = Comment.query.filter_by(comment_id=comment_id).first()
+    print("update: " + str(update))
     # update the following fields for the comment
     update.content = comment_new
-    update.date_updated = date_updated
+    print("current time: " + datetime.now())
+    update.date_updated = datetime.now()
     update.is_anonymous = is_anon
 
     db.session.commit()
@@ -107,12 +117,12 @@ def delete_comment():
     comment_id = request.args.get('comment_id')
 
     # query the comment with the id of comment_id
-    delete_com = Comment.query.filter_by(comment_id=comment_id)
+    delete_com = Comment.query.filter_by(comment_id=comment_id).first()
     # delete the comment from the database
     db.session.delete(delete_com)
 
     # num_comments in the question table need to subtract 1
-    question = Question.query.filter_by(question_id=question_id)
+    question = Question.query.filter_by(question_id=question_id).first()
     old_num = question.num_comments # get the current num_comments
     # subtract by 1 and update the num_comments
     question.num_comments = old_num - 1
