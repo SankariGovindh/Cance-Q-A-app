@@ -1,8 +1,8 @@
 # auth/forms.py
 # Frontend validation for user input
 # from flask_wtf import FlaskForm
-from wtforms import Form, StringField, PasswordField, validators, SubmitField
-from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length, Optional
+# from wtforms import Form, StringField, PasswordField, validators, SubmitField
+# from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length, Optional
 # from wtforms import Form, StringField, PasswordField, validators, SubmitField
 # from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length, Optional
 
