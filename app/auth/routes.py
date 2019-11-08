@@ -5,7 +5,6 @@ from flask import current_app as app
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from ..models import User
-from .forms import LoginForm, SignupForm
 from .. import db, login_manager
 
 
