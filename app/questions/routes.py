@@ -161,12 +161,17 @@ def delete_question():
     # get query parameters
     question_id = request.args.get("question_id")
 
-    # get the question that needs to be deleted
-    delete_q = Question.query.filter_by(question_id=question_id).first()
-    db.session.delete(delete_q)
+    # check if question_id is None or not
+    if question_id is not None:
+        # get the question that needs to be deleted
+        delete_q = Question.query.filter_by(question_id=question_id).first()
+        db.session.delete(delete_q)
 
-    db.session.commit()
-    return make_response(f"Question successfully deleted!", 200)
+        db.session.commit()
+        return make_response(f"Question successfully deleted!", 200)
+    
+    # if question_id is None
+    return make_response(f"Unable to delete the question due to missing question_id!", 400)
 
 
 @questions_bp.route("/update_question", methods=["PUT"])
@@ -175,16 +180,20 @@ def update_question():
     question_id = request.args.get("question_id")
     new_title = request.args.get("title")
     new_content = request.args.get("content")
-    new_date = request.args.get("date_updated")
     is_anon = int(request.args.get("is_anonymous"))
 
-    # get the question that needs to be updated
-    update_q = Question.query.filter_by(question_id=question_id).first()
-    # update the following fields of the question
-    update_q.title = new_title
-    update_q.content = new_content
-    update_q.date_updated = new_date
-    update_q.is_anonymous = is_anon
+    # check if there is missing variable
+    if question_id is not None and new_content is not None and is_anon is not None:
+        # get the question that needs to be updated
+        update_q = Question.query.filter_by(question_id=question_id).first()
+        # update the following fields of the question
+        update_q.title = new_title
+        update_q.content = new_content
+        update_q.date_updated = datetime.now()
+        update_q.is_anonymous = is_anon
 
-    db.session.commit()
-    return make_response(f"Question successfully updated!", 200)
+        db.session.commit()
+        return make_response(f"Question successfully updated!", 200)
+    
+    # if there is missing variable
+    return make_response(f"Unable to update the question due to missing information!", 400)
