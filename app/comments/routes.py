@@ -21,8 +21,6 @@ def add_comment():
     user_id = request.args.get('user_id')
     question_id = request.args.get('question_id')
     content = request.args.get('content')
-    date_created = datetime.now()
-    date_updated = datetime.now()
     is_anon = int(request.args.get('is_anonymous'))
     source = ('source')
 
@@ -37,8 +35,8 @@ def add_comment():
         new_comment = Comment(user_id=user_id,
                                 question_id=question_id,
                                 content=content,
-                                date_created=date_created,
-                                date_updated=date_updated,
+                                date_created=datetime.now(),
+                                date_updated=datetime.now(),
                                 is_anonymous=is_anon,
                                 source=source)
         db.session.add(new_comment) # adds a new comment to the database
@@ -47,6 +45,8 @@ def add_comment():
         question = Question.query.filter_by(question_id=question_id).first()
         old_num = int(question.num_comments)
         question.num_comments = old_num + 1
+        # update the date for that question
+        question.date_updated = datetime.now()
         
         db.session.commit() # commit all changes to the database
         return make_response(f"Comment successfully created!", 200)
@@ -93,18 +93,24 @@ def update_comment():
     """
 
     # get query parameters
+    question_id = request.args.get('question_id')
     comment_id = request.args.get('comment_id')
     comment_new = request.args.get('content')    
     is_anon = int(request.args.get('is_anonymous'))
 
     # check if there is any missing variable
-    if comment_id is not None and comment_new is not None and is_anon is not None:
+    if question_id is not None and comment_id is not None and comment_new is not None and is_anon is not None:
         # query the comment that need to be updated
         update = Comment.query.filter_by(comment_id=comment_id).first()
         # update the following fields for the comment
+        time_now = datetime.now()
         update.content = comment_new
-        update.date_updated = datetime.now()
+        update.date_updated = time_now
         update.is_anonymous = is_anon
+
+        # update the date_updated for that question
+        question = Question.query.filter_by(question_id=question_id).first()
+        question.date_updated = time_now
 
         db.session.commit()
         return make_response(f"Comment successfully updated!", 200)
@@ -137,7 +143,8 @@ def delete_comment():
         old_num = int(question.num_comments) # get the current num_comments
         # subtract by 1 and update the num_comments
         question.num_comments = old_num - 1
-        
+        question.date_updated = datetime.now()
+
         db.session.commit()
         return make_response(f"Comment successfully deleted!", 200) 
     
