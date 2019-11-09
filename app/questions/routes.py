@@ -71,7 +71,7 @@ def add_question():
 
 
 @questions_bp.route("/get_question", methods=["GET"])
-@login_required
+# @login_required
 def get_question():
     """Return a question from the database with id 'question_id' in JSON format.
 
