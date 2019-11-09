@@ -73,7 +73,7 @@ def get_user_info():
         # construct response
         response = []
         response.append({
-            "user_id": user.user_id,                
+            "id": user.user_id,                
             "user_first_name": user.first_name,
             "user_last_name": user.last_name,
             "user_username": user.username,
