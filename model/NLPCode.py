@@ -1,68 +1,120 @@
+import mysql.connector 
 import nltk
 import string
 import re
 import sklearn
-from sklearn.feature_extraction.text import CountVectorizer 
+from sklearn.feature_extraction.text import TfidfVectorizer
+import math 
+import json 
 
-##removing punctation 
-def removePunct(non_punctuation):
-    non_punctuation = "".join([char for char in query if char not in string.punctuation]) ##if character not part of the string.punctuation list store as prossedData 
-    return non_punctuation  
+def preProcess(query):             
+             
+    ##removing punctation 
+    def removePunct(non_punctuation):
+        non_punctuation = "".join([char for char in query if char not in string.punctuation]) ##if character not part of the string.punctuation list store as prossedData 
+        return non_punctuation  
 
-##tokenizing as separate words  
-def tokenize(tokens):
-    tokens = re.split('\W+',processedQuery) ##tokenizing every word and separating the same using commas 
-    return tokens 
+    ##tokenizing as separate words  
+    def tokenize(tokens):
+        tokens = re.split('\W+',processedQuery) ##tokenizing every word and separating the same using commas 
+        return tokens 
 
-##removing stopwords 
-def removeStopword(cleanData):
-    stopwords = nltk.corpus.stopwords.words('english') ##storing all the stopwords for the English language 
-    cleanData = [word for word in cleanData if word not in stopwords]
-    return cleanData 
+    ##removing stopwords 
+    def removeStopword(cleanData):
+        stopwords = nltk.corpus.stopwords.words('english') ##storing all the stopwords for the English language 
+        cleanData = [word for word in cleanData if word not in stopwords]
+        return cleanData 
 
-##stemming 
-def stemmer(currentData):
-    stemming = nltk.PorterStemmer()
-    stemmedData = [stemming.stem(word) for word in currentData]
-    return stemmedData
+    ##stemming 
+    def stemmer(currentData):
+        stemming = nltk.PorterStemmer()
+        stemmedData = [stemming.stem(word) for word in currentData]
+        return stemmedData
 
-##lemmatizing 
-def lemmatizing(currentData):
-    lemma = nltk.WordNetLemmatizer()
-    lemData = [lemma.lemmatize(word) for word in currentData]
-    return lemData 
-    
-##part-of-speeching 
-def posTagging(processedQuery):
-    tag = nltk.pos_tag(processedQuery) 
-    parsed = [word for word,pos in tag if (pos == 'NN' or pos == 'NNP' or pos == 'NNS' or pos == 'JJ' or pos == 'VB')]
-    processedQuery = str(parsed)
+    ##lemmatizing 
+    def lemmatizing(currentData):
+        lemma = nltk.WordNetLemmatizer()
+        lemData = [lemma.lemmatize(word) for word in currentData]
+        return lemData 
+
+    ##part-of-speeching 
+    def posTagging(processedQuery):
+        tag = nltk.pos_tag([i for i in processedQuery if i]) 
+        parsed = [word for word,pos in tag if (pos == 'NN' or pos == 'NNP' or pos == 'NNS' or pos == 'JJ' or pos == 'VB')]
+        return parsed
+
+    processedQuery = removePunct(query)
+    processedQuery = tokenize(processedQuery)
+    processedQuery = removeStopword(processedQuery)
+    processedQuery = stemmer(processedQuery)
+    processedQuery = lemmatizing(processedQuery)
+    processedQuery = posTagging(processedQuery)
     return processedQuery
 
-def bagOfWords(preProcessed):
-    ##iterable = ['husband', 'tri', 'chemo', 'morn', 'platelet', 'count', 'low', 'needle', 'low', 'stay', 'posit', 'get', 'hard', 'stay', 'posit', 'cours', 'sad', 'front', 'el', 'ani', 'input', 'blood', 'level', 'allow', 'eat', 'much', 'potassium', 'appreci', 'input']
-    count_vect = CountVectorizer()
-    X_counts = count_vect.fit_transform(preProcessed)
-    print(vectorizer.get_feature_names())
+##end of preProcess function
+
+content = []
+tfidf = [] ##storing the vector of every question in a list
+
+##connecting to a MySQL database 
+db = mysql.connector.connect(host="inventory-1.cs45dfwrhl7w.us-west-1.rds.amazonaws.com",
+                     user="administrator",
+                     passwd="Cancerbase2019",
+                     db="inventory")
+
+cursor = db.cursor()
+
+##querying all the questions from the table 
+cursor.execute("SELECT content FROM question")
+
+##reading data from database 
+for record in cursor:
+    query = ''.join(record)
+    content.append(preProcess(query))
+
+##passing the content list to TFIDF Vector to create vectors 
+def tfidfVectorizer(content): 
+    tfidf_vectorizer = TfidfVectorizer()
+    for i in content:
+        tfidf_matrix = tfidf_vectorizer.fit_transform(i)
+        print(tfidf_matrix.toarray())
+
+def termFrequency(term, content):
+    normalizeDocument = content #current question that is passed 
+    return normalizeDocument.count(term.lower()) / float(len(normalizeDocument))
 
 
-##read the input from the end user
-##query = input("Enter the user query:")
-query = "Husband tried to do chemo this morning but platelet counts were to low needless to say that brought his spirits down low too. I am trying to stay positive for him but it's getting so hard to stay positive. Of course I don't show my sadness in front of him but what else can be done? Any input of how we can get his blood levels back up? He's on bactrim so he's not allowed to eat anything with much potassium. Appreciate any input."
+def inverseDocumentFrequency(term, content):
+    numDocumentsWithThisTerm = 0
+    for doc in content:
+        if term.lower() in doc:
+            numDocumentsWithThisTerm = numDocumentsWithThisTerm + 1
+ 
+    if numDocumentsWithThisTerm > 0:
+        return 1.0 + math.log(float(len(content)) / numDocumentsWithThisTerm)
+    else:
+        return 1.0
 
-##preprocessing data - removing punctuations, stopwords, stemming and lemmatization 
-processedQuery = removePunct(query)
-processedQuery = tokenize(processedQuery)
-processedQuery = removeStopword(processedQuery)
-processedQuery = stemmer(processedQuery)
-processedQuery = lemmatizing(processedQuery)
-processedQuery = posTagging(processedQuery)
-print(processedQuery)
+cursor.close()
 
-##featue vector generation - using bag of words / n-grams   
+i = 1 
+data = {}
 
-##feature vector generation - using TF-IDF - perform TF-IDF for the data in the database - store the same in the database (separate table) - assign the values directly 
+for string in content:
+    c = ' '.join(string)
+    terms = c.split()
+    for term in terms: 
+        tf = termFrequency(term,string)
+        idf = inverseDocumentFrequency(term,content)
+        tfidf.append(tf*idf)
+    ##end of inner for     
+    
+    ##dumping to a JSON file 
+    data[i] = []
+    data[i].append(tfidf)
+    with open('data.txt', 'w') as outfile:
+        json.dump(data,outfile)
+    tfidf = [] ##clearing the list to store the new values 
+    i += 1 
 
-##use FastText later for the new words to train the model 
-
-##cosine similarity - between the string in the database and the user query 
+##performing cosine similarity between the user input query and returning the question index 

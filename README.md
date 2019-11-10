@@ -17,16 +17,15 @@ python wsgi.py
 ```
 8. Now you should be able to test API requests via Postman and see any associated changes in MySQL workbench.
 
-## Backend NLP 
-
-The backend NLP folder contains the code that parse the user string. 
+## NLP 
 
 1) Read the user string passed as parameter via the API call 
-2) Pre-process the query string and find the feature vector 
-3) Match similarity with that of the DB content, find the best match 
-4) Respond back with the comments corresponding to the best match 
+2) Pre-process the query string and find the feature vector using TFIDF 
+3) TFIDF values for the questions that are in the database is already pre-calculated and dumped to a JSON file 
+4) Cosine Similiarity is found between the user input's TFIDF vector against all the TFIDF vectors present in the JSON file. 
+5) Question ID with the highest match is returned back to an internal function, which then pull the corresponding links and comments from the database and sends back to the frontend app. 
 
-## AWS Setup Details 
+## AWS Login Details  
 
 Login Details : username : sankares@usc.edu and password : Cancerbase@2019
 
