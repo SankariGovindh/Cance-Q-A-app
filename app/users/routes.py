@@ -55,7 +55,7 @@ def add_user():
 
 
 @users_bp.route("/get_user_info", methods=["GET"])
-# @login_required
+@login_required
 def get_user_info():
     """Get user information."""
 
@@ -73,7 +73,7 @@ def get_user_info():
         # construct response
         response = []
         response.append({
-            "user_id": user.user_id,                
+            "user_id": user.id,                
             "user_first_name": user.first_name,
             "user_last_name": user.last_name,
             "user_username": user.username,
@@ -93,7 +93,7 @@ def get_user_info():
 
 
 @users_bp.route("/delete_user", methods=["DELETE"])
-# @login_required
+@login_required
 def delete_user():
     """Delete user from database."""
 
@@ -151,37 +151,42 @@ def update_user():
         curr_username = user.username
         curr_email = user.email        
 
-        # make sure username don't already exist in database (excluding user's current username)
-        if username != curr_username and User.query.filter_by(username=username).count() > 0:
-            # return make_response(f"Unable to update user. Username \"{username}\" is already taken.")
-            response = {
-                "message": f"Unable to update user. Username \"{username}\" is already taken.",
-                "success": False
-            }
-            return jsonify(response), 409, headers
+        # make sure username doesn't already exist in database (excluding user's current username)
+        # if username != curr_username and User.query.filter_by(username=username).count() > 0:            
+        #     response = {
+        #         "message": f"Unable to update user. Username \"{username}\" is already taken.",
+        #         "success": False
+        #     }
+        #     return jsonify(response), 409, headers
 
         # make sure email don't already exist in database (excluding user's current email)
-        if email != curr_email and User.query.filter_by(email=email).count() > 0:
-            # return make_response(f"Unable to update email. \"{email}\" is already associated with another account.")
-            response = {
-                "message": f"Unable to update email. \"{email}\" is already associated with another account.",
-                "success": False
-            }
-            return jsonify(response), 409, headers
+        # if email != curr_email and User.query.filter_by(email=email).count() > 0:
+        #     # return make_response(f"Unable to update email. \"{email}\" is already associated with another account.")
+        #     response = {
+        #         "message": f"Unable to update email. \"{email}\" is already associated with another account.",
+        #         "success": False
+        #     }
+        #     return jsonify(response), 409, headers
 
         # update user details
         if len(first_name) != 0 and first_name is not None:
+            print("Updating first name...")
             user.first_name = first_name
         if len(last_name) != 0 and last_name is not None:
+            print("Updating last name...")
             user.last_name = last_name    
         if len(username) != 0 and username is not None:
+            print("Updating username...")
             user.username = username    
         if len(email) != 0 and email is not None: # add email format verification here or in client-side code?
+            print("Updating email...")
             user.email = email
         if len(password) != 0 and password is not None:
+            print("Updating password...")
             user.password = generate_password_hash(password)
         
-        # update database entry
+        # update database entry     
+        print("db.session: " + str(db.session))   
         db.session.commit()
         
         # return make_response(f"{user} successfully updated.", 200)
