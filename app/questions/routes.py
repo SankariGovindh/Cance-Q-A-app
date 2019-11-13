@@ -2,6 +2,7 @@
 from flask import Blueprint, request, make_response, jsonify
 from flask import current_app as app
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import desc
 from ..models import Question, Comment
 from datetime import datetime
 from flask_login import login_required
@@ -104,17 +105,17 @@ def get_question():
     return jsonify(response), 200, headers
 
 
-@questions_bp.route("/get_faqs", methods=["GET"])
-# @login_required
-def get_faqs():
-    """Return a JSON object of the top 10 most frequently asked questions FAQs."""
+@questions_bp.route("/get_recent_qs", methods=["GET"])
+#@login_required
+def get_recent_qs():
+    """Return a JSON object of the top 10 most recently updated questions FAQs."""
 
     # get top 10 questions from database (what metric defines a FAQ?)
-    faqs = Question.query.order_by(Question.question_id).limit(10)
+    recent_qs = Question.query.order_by(desc(Question.date_updated)).limit(10).all()
 
     # construct response
     response = []
-    for question in faqs:
+    for question in recent_qs:
 
         question_id = question.question_id
 
@@ -197,3 +198,59 @@ def update_question():
     
     # if there is missing variable
     return make_response(f"Unable to update the question due to missing information!", 400)
+
+
+@questions_bp.route("/get_history_q", methods=["GET"])
+#@login_required
+def get_history_q():
+    """Return a JSON object of all the questions asked by the user with user_id"""
+
+    # get query parameters
+    user_id = request.args.get("user_id")
+
+    if user_id is not None:
+        # get all history questions for that user
+        all_question = Question.query.filter_by(user_id=user_id).all()
+
+        # construct response
+        response = []
+        for question in all_question:
+
+            question_id = question.question_id
+
+            # get comments associated with the question_id
+            comments = Comment.query.filter_by(question_id=question_id).all()
+            comment_user_id = []
+            comment_content = []
+            comment_source = []
+            comment_is_anon = []
+            comment_date_updated = []
+            for comment in comments:
+                comment_user_id.append(comment.user_id)
+                comment_content.append(comment.content)
+                comment_source.append(comment.source)
+                comment_is_anon.append(comment.is_anonymous)
+                comment_date_updated.append(comment.date_updated)
+
+            # add question data into response
+            response.append({
+                "id": question.question_id,
+                "question_user_id": question.user_id,
+                "question_title": question.title,
+                "question_date_updated": question.date_updated,
+                "question_source": question.source,
+                "question_content": question.content,
+                "question_num_comments": question.num_comments,
+                "question_is_anon": question.is_anonymous,
+                "comment_content": comment_content,
+                "comment_source": comment_source,
+                "comment_date_updated": comment_date_updated,
+                "comment_is_anon": comment_is_anon,
+                "comment_user_id": comment_user_id
+            })
+
+        # prepare headers for response
+        headers = {"Content-Type": "application/json"}
+
+        return jsonify(response), 200, headers
+    return make_response(f"Unable to get questions due to missing user_id!", 400)
