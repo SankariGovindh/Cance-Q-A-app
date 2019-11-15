@@ -35,6 +35,6 @@ def create_app():
         flask_app.register_blueprint(auth_routes.auth_bp)
 
         # initialize global db
-        db.create_all()
+        # db.create_all()
 
         return flask_app
