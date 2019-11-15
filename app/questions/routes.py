@@ -42,7 +42,7 @@ def add_question():
             return make_response(f"This question already exists!", 400)
 
         # check if source was provided
-        if source is None:
+        if source is None or len(source) == 0:
             source = "SideEffects App" # default source
 
         # create new question object
@@ -105,9 +105,9 @@ def get_question():
     return jsonify(response), 200, headers
 
 
-@questions_bp.route("/get_recent_qs", methods=["GET"])
+@questions_bp.route("/get_recent_questions", methods=["GET"])
 #@login_required
-def get_recent_qs():
+def get_recent_questions():
     """Return a JSON object of the top 10 most recently updated questions FAQs."""
 
     # get top 10 questions from database (what metric defines a FAQ?)
@@ -158,6 +158,7 @@ def get_recent_qs():
 
 # not sure about the methods
 @questions_bp.route("/delete_question", methods=["DELETE"])
+#@login_required
 def delete_question():
     # get query parameters
     question_id = request.args.get("question_id")
@@ -176,6 +177,7 @@ def delete_question():
 
 
 @questions_bp.route("/update_question", methods=["PUT"])
+#@login_required
 def update_question():
     # get query parameters
     question_id = request.args.get("question_id")
@@ -200,15 +202,15 @@ def update_question():
     return make_response(f"Unable to update the question due to missing information!", 400)
 
 
-@questions_bp.route("/get_history_q", methods=["GET"])
-#@login_required
-def get_history_q():
+@questions_bp.route("/get_question_history", methods=["GET"])
+# @login_required
+def get_question_history():
     """Return a JSON object of all the questions asked by the user with user_id"""
 
     # get query parameters
     user_id = request.args.get("user_id")
 
-    if user_id is not None:
+    if user_id:
         # get all history questions for that user
         all_question = Question.query.filter_by(user_id=user_id).all()
 
@@ -252,5 +254,5 @@ def get_history_q():
         # prepare headers for response
         headers = {"Content-Type": "application/json"}
 
-        return jsonify(response), 200, headers
+        return jsonify(response), 200, headers    
     return make_response(f"Unable to get questions due to missing user_id!", 400)

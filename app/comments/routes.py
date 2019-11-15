@@ -56,6 +56,7 @@ def add_comment():
 
 
 @comments_bp.route('/get_comments', methods=['GET'])
+#@login_required
 def get_comments():
    """Return the comments associated with a specified question_id in JSON format.
    Precondition(s):
@@ -64,7 +65,7 @@ def get_comments():
    # get query parameters
    question_id = request.args.get('question_id')
 
-   # check if question_is is None or not
+   # check if question_id is None or not
    if question_id is not None:
        # get all comments that is from the question_id
        comments = Comment.query.filter_by(question_id=question_id).all()
@@ -86,6 +87,7 @@ def get_comments():
 
 
 @comments_bp.route('/update_comment', methods=['PUT'])
+#@login_required
 def update_comment():
     """Update the comment with id 'comment_id' that is associated with the
     question with id 'question_id'.
@@ -120,6 +122,7 @@ def update_comment():
 
 
 @comments_bp.route('/delete_comment', methods=['DELETE'])
+#@login_required
 def delete_comment():
     """Delete the comment with id 'comment_id' that is associated with the
     question with id 'question_id'.

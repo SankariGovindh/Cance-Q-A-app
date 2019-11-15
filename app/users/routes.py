@@ -55,7 +55,7 @@ def add_user():
 
 
 @users_bp.route("/get_user_info", methods=["GET"])
-@login_required
+# @login_required
 def get_user_info():
     """Get user information."""
 
@@ -93,7 +93,7 @@ def get_user_info():
 
 
 @users_bp.route("/delete_user", methods=["DELETE"])
-@login_required
+# @login_required
 def delete_user():
     """Delete user from database."""
 
