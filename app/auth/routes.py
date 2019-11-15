@@ -15,36 +15,72 @@ auth_bp = Blueprint('auth_bp', __name__)
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
     """User login page."""
+    ################### USE FOR FRONTEND TESTING PURPOSES ######################
+    # response = {
+    #     "message": "Successful user login.",
+    #     "user_id": "1"
+    # }
+    # return jsonify(response), 200
+    ################### USE FOR FRONTEND TESTING PURPOSES ######################
+
+    # bypass login page if user is already logged in
+    print("current_user: " + str(current_user))
+    print("Is current user authenticated? " + str(current_user.is_authenticated))
+
+    # prepare headers for response
+    headers = {"Content-Type": "application/json"}
+    
+    if current_user.is_authenticated:
+        # return redirect(url_for("questions_bp.get_faqs")) # pass Kevin user_id
+        next = request.args.get("next") # take users to the page that they had attempted to reach prior to logging in
+        # return redirect(next or url_for("questions_bp.get_faqs"))
+        response = {
+                "message": "User was already logged in.",
+                "success": True,
+                "user_id": current_user.user_id
+            }
+        return jsonify(response), 200, headers
+
+    # POST: Log in user and take them to FAQs page
+    if request.method == "POST":
+        # get query arguments
+        username = str(request.args.get("username"))
+        password = str(request.args.get("password"))        
+
+        # validate login attempt
+        user = User.query.filter_by(username=username).first()
+        print("User hashed password in db: " + str(user.password))
+        if user:            
+            # if check_password_hash(user.password, password):
+            if User.check_password(password):
+                login_user(user)
+                next = request.args.get("next") # take users to the page that they had attempted to reach prior to logging in
+                # return redirect(next or url_for("questions_bp.get_faqs"))
+                response = {
+                    "message": "Successfully login.",
+                    "success": True,
+                    "user_id": user.user_id
+                }
+                return jsonify(response), 200, headers
+        print("Invalid username or password.") # SEND THIS MESSAGE IN JSON TO FRONTEND
+        # return redirect(url_for("auth_bp.login"))
+
+        response = {
+            "message": "Invalid username or password.",
+            "success": False
+        }
+        return jsonify(response), 401, headers
+
+    # prepare headers for response
+    headers = {"Content-Type": "application/json"}
+
+    # GET: Take user to login page.
     response = {
-        "message": "Successful user login.",
-        "user_id": "1"
+        "message": "You have reached the login page.",
+        "success": True
     }
-    return jsonify(response), 200
-    # # bypass login page if user is already logged in
-    # print("current_user: " + str(current_user))
-    # print("Is current user authenticated? " + str(current_user.is_authenticated))
-    # if current_user.is_authenticated:
-    #     # return redirect(url_for("questions_bp.get_faqs")) # pass Kevin user_id
-    #     return     
-      
-    # # POST: Log in user and take them to FAQs page
-    # if request.method == "POST":                                       
-    #     # get query arguments
-    #     username = request.args.get("username")
-    #     password = request.args.get("password")        
-        
-    #     # validate login attempt
-    #     user = User.query.filter_by(username=username).first()        
-    #     if user:
-    #         if user.check_password(password=password):                
-    #             login_user(user)
-    #             next = request.args.get("next") # take users to the page that they had attempted to reach prior to logging in
-    #             return redirect(next or url_for("questions_bp.get_faqs"))
-    #     print("Invalid username or password.") # SEND THIS MESSAGE IN JSON TO FRONTEND
-    #     return redirect(url_for("auth_bp.login"))
-        
-    # # GET: Take user to login page.
-    # return redirect(url_for("auth_bp.login"))    
+    return jsonify(response), 200, headers
+    # return redirect(url_for("auth_bp.login"))
 
 
 @auth_bp.route("/logout")
@@ -67,7 +103,7 @@ def load_user(user_id):
 
     # prepare headers for response
     headers = {"Content-Type": "application/json"}
-    
+
     return jsonify(response), 401, headers
 
 
@@ -75,6 +111,11 @@ def load_user(user_id):
 def unauthorized():
     """Redirect unauthorized users to login page."""
     print("You must be logged in to view that page.") # SEND THIS MESSAGE IN JSON TO FRONTEND
+    # response = {
+    #     "message": "You must be logged in to view that page.",
+    #     "user_id": "1"
+    # }
+    # return jsonify(response), 200
     return redirect(url_for("auth_bp.login"))
 
 
@@ -104,10 +145,10 @@ def signup():
                             password=generate_password_hash(password, method="sha256")
                         )
                 db.session.add(new_user)
-                db.session.commit()                
+                db.session.commit()
                 return redirect(url_for("auth_bp.login"))
             print("A user already exists with that username or email.") # SEND THIS MESSAGE IN JSON TO FRONTEND
-            return redirect(url_for("auth_bp.signup"))        
-            
+            return redirect(url_for("auth_bp.signup"))
+
     # GET: Serve registration page.
     return redirect(url_for("auth_bp.signup"))

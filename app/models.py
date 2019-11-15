@@ -1,10 +1,19 @@
 # models.py
 from . import db
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+from . import login_manager
 
 
-class User(db.Model):
+# @login_manager.user_loader
+# def load_user(user_id):
+#     """Check if user is logged-in on every page load."""
+#     if user_id is not None:
+#         return User.query.get(user_id)
+#     return None
+
+class User(UserMixin, db.Model):
     user_id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(45), nullable=False)
     last_name = db.Column(db.String(45), nullable=False)
@@ -12,11 +21,12 @@ class User(db.Model):
     email = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False) # length 200 to store hashed password
     date_created = db.Column(db.DateTime, default=db.func.now())
+    # last_login = db.Column(db.DateTime)
     # cancer_history = db.Column(db.) # SQLAlchemy doesn't have JSON type; https://flask-sqlalchemy.palletsprojects.com/en/2.x/models/
     # gender_id = db.Column(db.Integer) # associate gender_id with gender_table?
     # age = db.Column(db.Integer)
     # cancer_type_id = db.Column(db.Integer) # associate cancer_type_id with cancer_type table?
-    # treatments = alternative to JSON? # SQLAlchemy doesn't have JSON type; https://flask-sqlalchemy.palletsprojects.com/en/2.x/models/
+    # treatments = alternative to JSON? # SQLAlchemy doesn't have JSON type; https://flask-sqlalchemy.palletsprojects.com/en/2.x/models/    
 
     def set_password(self, password):
         """Create hashed password."""
@@ -26,15 +36,19 @@ class User(db.Model):
         """Check hashed password."""
         return check_password_hash(self.password, password)
 
+    def get_id(self):
+        """Override default get_id()."""
+        return self.user_id
+
     def __repr__(self):
-        return "<User {}>".format(self.username)
+        return "<User {}>".format(self.username)    
 
 
 class Question(db.Model):
     question_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer)
     title = db.Column(db.String(200))
-    content = db.Column(db.String(500), nullable=False)
+    content = db.Column(db.String(1000), nullable=False)
     date_created = db.Column(db.DateTime, default=db.func.now())
     date_updated = db.Column(db.DateTime, default=db.func.now())
     is_anonymous = db.Column(db.Boolean, nullable=False)
@@ -49,7 +63,7 @@ class Comment(db.Model):
     comment_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer)
     question_id = db.Column(db.Integer, nullable=False)
-    content = db.Column(db.String(750), nullable=False)
+    content = db.Column(db.String(1000), nullable=False)
     date_created = db.Column(db.DateTime, default=db.func.now())
     date_updated = db.Column(db.DateTime, default=db.func.now())
     is_anonymous = db.Column(db.Boolean, nullable=False)
