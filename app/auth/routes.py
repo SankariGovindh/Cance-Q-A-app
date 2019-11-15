@@ -51,13 +51,13 @@ def login():
         user = User.query.filter_by(username=username).first()
         print("User hashed password in db: " + str(user.password))
         if user:            
-            # if check_password_hash(user.password, password):
-            if User.check_password(password):
+            if check_password_hash(user.password, password):
+            # if User.check_password(password):
                 login_user(user)
                 next = request.args.get("next") # take users to the page that they had attempted to reach prior to logging in
                 # return redirect(next or url_for("questions_bp.get_faqs"))
                 response = {
-                    "message": "Successfully login.",
+                    "message": "Successful login.",
                     "success": True,
                     "user_id": user.user_id
                 }
@@ -70,9 +70,6 @@ def login():
             "success": False
         }
         return jsonify(response), 401, headers
-
-    # prepare headers for response
-    headers = {"Content-Type": "application/json"}
 
     # GET: Take user to login page.
     response = {
