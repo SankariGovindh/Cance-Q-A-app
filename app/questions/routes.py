@@ -14,7 +14,7 @@ questions_bp = Blueprint("questions_bp", __name__)
 
 
 @questions_bp.route("/add_question", methods=["POST"])
-# @login_required
+@login_required
 def add_question():
     """Add a question to the database.
 
@@ -71,7 +71,7 @@ def add_question():
 
 
 @questions_bp.route("/get_question", methods=["GET"])
-# @login_required
+@login_required
 def get_question():
     """Return a question from the database with id 'question_id' in JSON format.
 
@@ -106,7 +106,7 @@ def get_question():
 
 
 @questions_bp.route("/get_recent_questions", methods=["GET"])
-#@login_required
+@login_required
 def get_recent_questions():
     """Return a JSON object of the top 10 most recently updated questions FAQs."""
 
@@ -173,9 +173,8 @@ def get_recent_questions():
     return jsonify(response), 200, headers
 
 
-# not sure about the methods
 @questions_bp.route("/delete_question", methods=["DELETE"])
-#@login_required
+@login_required
 def delete_question():
     # get query parameters
     question_id = request.args.get("question_id")
@@ -194,7 +193,7 @@ def delete_question():
 
 
 @questions_bp.route("/update_question", methods=["PUT"])
-#@login_required
+@login_required
 def update_question():
     # get query parameters
     question_id = request.args.get("question_id")
@@ -233,6 +232,22 @@ def get_question_history():
 
         # construct response
         response = []
+        if len(all_question) == 0:
+            response = {
+                "id": [],
+                "question_user_id": [],
+                "question_title": [],
+                "question_date_updated": [],
+                "question_source": [],
+                "question_content": [],
+                "question_num_comments": [],
+                "question_is_anon": [],
+                "comment_content": [],
+                "comment_source": [],
+                "comment_date_updated": [],
+                "comment_is_anon": [],
+                "comment_user_id": []
+            }
         for question in all_question:
 
             question_id = question.question_id
