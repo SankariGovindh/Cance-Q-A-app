@@ -3,7 +3,7 @@ from flask import Blueprint, request, make_response, jsonify
 from flask import current_app as app
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import desc
-from ..models import Question, Comment
+from ..models import Question, Comment, User
 from datetime import datetime
 from flask_login import login_required
 from .. import db
@@ -118,16 +118,31 @@ def get_recent_questions():
     for question in recent_qs:
 
         question_id = question.question_id
+        # check if the question is from Facebook
+        if question.user_id == 0:
+            q_username = "Facebook"
+        else:
+            q_user = User.query.filter_by(user_id=question.user_id).first()
+            q_username = q_user.username
 
         # get comments associated with the question_id
         comments = Comment.query.filter_by(question_id=question_id).all()
         comment_user_id = []
+        comment_username = []
         comment_content = []
         comment_source = []
         comment_is_anon = []
         comment_date_updated = []
         for comment in comments:
+            # check if the comment is from Facebook group
+            if comment.user_id == 0:
+                c_username = "Facebook"
+            else:
+                # get the user for that comment
+                c_user = User.query.filter_by(user_id=comment.user_id).first()
+                c_username = c_user.username
             comment_user_id.append(comment.user_id)
+            comment_username.append(c_username)
             comment_content.append(comment.content)
             comment_source.append(comment.source)
             comment_is_anon.append(comment.is_anonymous)
@@ -137,6 +152,7 @@ def get_recent_questions():
         response.append({
             "id": question.question_id,
             "question_user_id": question.user_id,
+            "question_username": q_username,
             "question_title": question.title,
             "question_date_updated": question.date_updated,
             "question_source": question.source,
@@ -147,7 +163,8 @@ def get_recent_questions():
             "comment_source": comment_source,
             "comment_date_updated": comment_date_updated,
             "comment_is_anon": comment_is_anon,
-            "comment_user_id": comment_user_id
+            "comment_user_id": comment_user_id,
+            "comment_username": comment_username
         })
 
     # prepare headers for response
@@ -219,16 +236,32 @@ def get_question_history():
         for question in all_question:
 
             question_id = question.question_id
+            # check if the question is from Facebook
+            if question.user_id == 0:
+                q_username = "Facebook"
+            else:
+                q_user = User.query.filter_by(user_id=question.user_id).first()
+                q_username = q_user.username
 
             # get comments associated with the question_id
             comments = Comment.query.filter_by(question_id=question_id).all()
             comment_user_id = []
+            comment_username = []
             comment_content = []
             comment_source = []
             comment_is_anon = []
             comment_date_updated = []
             for comment in comments:
+                # check if the comment is from Facebook group
+                if comment.user_id == 0:
+                    c_username = "Facebook"
+                else:
+                    # get the user for that comment
+                    c_user = User.query.filter_by(user_id=comment.user_id).first()
+                    c_username = c_user.username
+
                 comment_user_id.append(comment.user_id)
+                comment_username.append(c_username)
                 comment_content.append(comment.content)
                 comment_source.append(comment.source)
                 comment_is_anon.append(comment.is_anonymous)
@@ -238,6 +271,7 @@ def get_question_history():
             response.append({
                 "id": question.question_id,
                 "question_user_id": question.user_id,
+                "question_username": q_username,
                 "question_title": question.title,
                 "question_date_updated": question.date_updated,
                 "question_source": question.source,
@@ -248,7 +282,8 @@ def get_question_history():
                 "comment_source": comment_source,
                 "comment_date_updated": comment_date_updated,
                 "comment_is_anon": comment_is_anon,
-                "comment_user_id": comment_user_id
+                "comment_user_id": comment_user_id,
+                "comment_username": comment_username
             })
 
         # prepare headers for response
