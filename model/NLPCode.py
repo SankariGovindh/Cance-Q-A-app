@@ -1,11 +1,11 @@
-import mysql.connector 
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
+import pickle
+import joblib
 import nltk
-import string
-import re
-import sklearn
-from sklearn.feature_extraction.text import TfidfVectorizer
+import re 
+import string 
 import math 
-import json 
 
 def preProcess(query):             
              
@@ -53,68 +53,16 @@ def preProcess(query):
 
 ##end of preProcess function
 
-content = []
-tfidf = [] ##storing the vector of every question in a list
+TOP_K = 5
 
-##connecting to a MySQL database 
-db = mysql.connector.connect(host="inventory-1.cs45dfwrhl7w.us-west-1.rds.amazonaws.com",
-                     user="administrator",
-                     passwd="Cancerbase2019",
-                     db="inventory")
+with open('vectors.pkl', 'rb') as f:
+    tfidf_matrix, ids = pickle.load(f)
+tfidf_vectorizer = joblib.load('vectorizer.joblib')
 
-cursor = db.cursor()
-
-##querying all the questions from the table 
-cursor.execute("SELECT content FROM question")
-
-##reading data from database 
-for record in cursor:
-    query = ''.join(record)
-    content.append(preProcess(query))
-
-##passing the content list to TFIDF Vector to create vectors 
-def tfidfVectorizer(content): 
-    tfidf_vectorizer = TfidfVectorizer()
-    for i in content:
-        tfidf_matrix = tfidf_vectorizer.fit_transform(i)
-        print(tfidf_matrix.toarray())
-
-def termFrequency(term, content):
-    normalizeDocument = content #current question that is passed 
-    return normalizeDocument.count(term.lower()) / float(len(normalizeDocument))
-
-
-def inverseDocumentFrequency(term, content):
-    numDocumentsWithThisTerm = 0
-    for doc in content:
-        if term.lower() in doc:
-            numDocumentsWithThisTerm = numDocumentsWithThisTerm + 1
- 
-    if numDocumentsWithThisTerm > 0:
-        return 1.0 + math.log(float(len(content)) / numDocumentsWithThisTerm)
-    else:
-        return 1.0
-
-cursor.close()
-
-i = 1 
-data = {}
-
-for string in content:
-    c = ' '.join(string)
-    terms = c.split()
-    for term in terms: 
-        tf = termFrequency(term,string)
-        idf = inverseDocumentFrequency(term,content)
-        tfidf.append(tf*idf)
-    ##end of inner for     
-    
-    ##dumping to a JSON file 
-    data[i] = []
-    data[i].append(tfidf)
-    with open('data.txt', 'w') as outfile:
-        json.dump(data,outfile)
-    tfidf = [] ##clearing the list to store the new values 
-    i += 1 
-
-##performing cosine similarity between the user input query and returning the question index 
+query = preProcess(test_query)
+cosine_similarities = cosine_similarity(tfidf_matrix, tfidf_vectorizer.transform([' '.join(query)])).reshape(-1)
+cosine_similarities = cosine_similarities[cosine_similarities > 0.0]
+if cosine_similarities.tolist():
+    raise Exception('No similar questions found!!')
+top_k_max_indices = cosine_similarities.argsort()[-TOP_K:][::-1]
+top_k_question_ids = np.array(ids)[top_k_max_indices]
