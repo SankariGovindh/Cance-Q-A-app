@@ -1,6 +1,7 @@
 # comments/routes.py
-from flask import Blueprint, request, jsonify, make_response
+from flask import Blueprint, request, redirect, url_for, jsonify, make_response
 from flask import current_app as app
+from flask_login import current_user
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import login_required
 from datetime import datetime
@@ -13,16 +14,17 @@ comments_bp = Blueprint('comments_bp', __name__)
 
 
 @comments_bp.route('/add_comment', methods=['POST'])
-# @login_required
+@login_required
 def add_comment():
     """Add comment to the question thread with id 'question_id'."""
 
-    # get query parameters from the frontend?
-    user_id = request.args.get('user_id')
-    question_id = request.args.get('question_id')
-    content = request.args.get('content')
-    is_anon = int(request.args.get('is_anonymous'))
-    source = ('source')
+    # get query parameters
+    user_id = request.args.get("user_id")
+    username = request.args.get("username")
+    question_id = request.args.get("question_id")
+    content = request.args.get("content")
+    is_anon = int(request.args.get("is_anonymous"))
+    source = ("source")
 
     # check if user_id, content, is_anon are None or not
     if user_id is not None and content is not None and is_anon is not None:
@@ -49,14 +51,22 @@ def add_comment():
         question.date_updated = datetime.now()
         
         db.session.commit() # commit all changes to the database
-        return make_response(f"Comment successfully created!", 200)
+        # return make_response(f"Comment successfully created!", 200)
+        return redirect(url_for("questions_bp.get_recent_questions", 
+                                user_id=current_user.user_id, 
+                                username=current_user.username,
+                                message="Comment successfully created."), code=200)
 
     # if there is missing information
-    return make_response(f"Unable to create a comment due to missing information!", 400) 
+    # return make_response(f"Unable to create a comment due to missing information!", 400) 
+    return redirect(url_for("questions_bp.get_recent_questions", 
+                            user_id=current_user.user_id, 
+                            username=current_user.username,
+                            message="Unable to create comment due to missing information."), code=400)
 
 
 @comments_bp.route('/get_comments', methods=['GET'])
-#@login_required
+@login_required
 def get_comments():
    """Return the comments associated with a specified question_id in JSON format.
    Precondition(s):
@@ -87,7 +97,7 @@ def get_comments():
 
 
 @comments_bp.route('/update_comment', methods=['PUT'])
-#@login_required
+@login_required
 def update_comment():
     """Update the comment with id 'comment_id' that is associated with the
     question with id 'question_id'.
@@ -95,10 +105,12 @@ def update_comment():
     """
 
     # get query parameters
-    question_id = request.args.get('question_id')
-    comment_id = request.args.get('comment_id')
-    comment_new = request.args.get('content')    
-    is_anon = int(request.args.get('is_anonymous'))
+    user_id = request.args.get("user_id")
+    username = request.args.get("username")
+    question_id = request.args.get("question_id")
+    comment_id = request.args.get("comment_id")
+    comment_new = request.args.get("content")    
+    is_anon = int(request.args.get("is_anonymous"))
 
     # check if there is any missing variable
     if question_id is not None and comment_id is not None and comment_new is not None and is_anon is not None:
@@ -115,19 +127,26 @@ def update_comment():
         question.date_updated = time_now
 
         db.session.commit()
-        return make_response(f"Comment successfully updated!", 200)
+        # return make_response(f"Comment successfully updated!", 200)
+        return redirect(url_for("questions_bp.get_recent_questions", 
+                                user_id=current_user.user_id, 
+                                username=current_user.username,
+                                message="Comment successfully updated."), code=200)
     
     # if one of the variables is missing
-    return make_response(f"Unable to update comments due to missing information!", 400)
+    # return make_response(f"Unable to update comments due to missing information!", 400)
+    return redirect(url_for("questions_bp.get_recent_questions", 
+                            user_id=current_user.user_id, 
+                            username=current_user.username,
+                            message="Unable to update comments due to missing information."), code=400)
 
 
 @comments_bp.route('/delete_comment', methods=['DELETE'])
-#@login_required
+@login_required
 def delete_comment():
     """Delete the comment with id 'comment_id' that is associated with the
     question with id 'question_id'.
     subtract 1 from the num_comments column for that question
-
     """
 
     # get query parameters

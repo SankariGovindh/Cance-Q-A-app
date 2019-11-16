@@ -30,17 +30,17 @@ def login():
     # prepare headers for response
     headers = {"Content-Type": "application/json"}
     
-    if current_user.is_authenticated:
-        # return redirect(url_for("questions_bp.get_faqs")) # pass Kevin user_id
-        next = request.args.get("next") # take users to the page that they had attempted to reach prior to logging in
-        # return redirect(next or url_for("questions_bp.get_faqs"))
+    if current_user.is_authenticated:        
+        next = request.args.get("next") # take users to the page that they had attempted to reach prior to logging in        
         response = {
                 "message": "User was already logged in.",
                 "success": True,
                 "user_id": current_user.user_id
             }
-        # return jsonify(response), 200, headers
-        return redirect(url_for("questions_bp.get_faqs"))
+        # return jsonify(response), 200, headers        
+        return redirect(url_for("questions_bp.get_recent_questions", 
+                                user_id=current_user.user_id, 
+                                username=current_user.username), code=302)
 
     # POST: Log in user and take them to FAQs page
     if request.method == "POST":
@@ -55,15 +55,16 @@ def login():
             if check_password_hash(user.password, password):
             # if User.check_password(password):
                 login_user(user)
-                next = request.args.get("next") # take users to the page that they had attempted to reach prior to logging in
-                # return redirect(next or url_for("questions_bp.get_faqs"))
+                next = request.args.get("next") # take users to the page that they had attempted to reach prior to logging in                
                 response = {
                     "message": "Successful login.",
                     "success": True,
                     "user_id": user.user_id
                 }
-                return jsonify(response), 200, headers      
-        # return redirect(url_for("auth_bp.login"))
+                # return jsonify(response), 200, headers   
+                return redirect(url_for("questions_bp.get_recent_questions", 
+                                user_id=current_user.user_id, 
+                                username=current_user.username), code=302)        
 
         response = {
             "message": "Invalid username or password.",
@@ -85,7 +86,7 @@ def login():
 def logout_page():
     """User logout logic."""
     logout_user()
-    return redirect(url_for("auth_bp.login"))
+    return redirect(url_for("auth_bp.login"), code=200)
 
 
 @login_manager.user_loader
