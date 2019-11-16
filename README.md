@@ -17,13 +17,15 @@ python wsgi.py
 ```
 8. Now you should be able to test API requests via Postman and see any associated changes in MySQL workbench.
 
-## NLP 
+## NLP - /search endpoint  
 
 1) Read the user string passed as parameter via the API call 
-2) Pre-process the query string and find the feature vector using TFIDF 
-3) TFIDF values for the questions that are in the database is already pre-calculated and dumped to a JSON file 
+2) Pre-process the query string and find the tfidf vector 
+3) TFIDF values for the questions that are in the database is already pre-calculated and dumped to a pkl file
 4) Cosine Similiarity is found between the user input's TFIDF vector against all the TFIDF vectors present in the JSON file. 
 5) Question ID with the highest match is returned back to an internal function, which then pull the corresponding links and comments from the database and sends back to the frontend app. 
+
+TrainingCode.py - To be executed every time there is a modification in the database. The code generates a pkl file containing the TFIDF matrix, which is then read in the NLPCode and similarity is performed. 
 
 ## AWS Login Details  
 
