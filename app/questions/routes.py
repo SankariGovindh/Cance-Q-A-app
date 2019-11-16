@@ -22,6 +22,7 @@ import scipy
 import string
 import json
 import pickle
+import os
 
 # set up a blueprint
 questions_bp = Blueprint("questions_bp", __name__)
@@ -348,63 +349,69 @@ def get_question_history():
 def search():    
     test_query = request.args.get("query")
 
-    def preProcess(query):
+    # def preProcess(query):
 
-        ##removing punctuation
-        def removePunct(non_punctuation):
-            non_punctuation = "".join([char for char in query if char not in string.punctuation]) ##if character not part of the string.punctuation list store as prossedData
-            return non_punctuation
+    #     ##removing punctuation
+    #     def removePunct(non_punctuation):
+    #         non_punctuation = "".join([char for char in query if char not in string.punctuation]) ##if character not part of the string.punctuation list store as prossedData
+    #         return non_punctuation
 
-        ##tokenizing as separate words
-        def tokenize(tokens):
-            tokens = re.split('\W+',processedQuery) ##tokenizing every word and separating the same using commas
-            return tokens
+    #     ##tokenizing as separate words
+    #     def tokenize(tokens):
+    #         tokens = re.split('\W+',processedQuery) ##tokenizing every word and separating the same using commas
+    #         return tokens
 
-        ##removing stopwords
-        def removeStopword(cleanData):
-            stopwords = nltk.corpus.stopwords.words('english') ##storing all the stopwords for the English language
-            cleanData = [word for word in cleanData if word not in stopwords]
-            return cleanData
+    #     ##removing stopwords
+    #     def removeStopword(cleanData):
+    #         stopwords = nltk.corpus.stopwords.words('english') ##storing all the stopwords for the English language
+    #         cleanData = [word for word in cleanData if word not in stopwords]
+    #         return cleanData
 
-        ##stemming
-        def stemmer(currentData):
-            stemming = nltk.PorterStemmer()
-            stemmedData = [stemming.stem(word) for word in currentData]
-            return stemmedData
+    #     ##stemming
+    #     def stemmer(currentData):
+    #         stemming = nltk.PorterStemmer()
+    #         stemmedData = [stemming.stem(word) for word in currentData]
+    #         return stemmedData
 
-        ##lemmatizing
-        def lemmatizing(currentData):
-            lemma = nltk.WordNetLemmatizer()
-            lemData = [lemma.lemmatize(word) for word in currentData]
-            return lemData
+    #     ##lemmatizing
+    #     def lemmatizing(currentData):
+    #         lemma = nltk.WordNetLemmatizer()
+    #         lemData = [lemma.lemmatize(word) for word in currentData]
+    #         return lemData
 
-        ##part-of-speeching
-        def posTagging(processedQuery):
-            tag = nltk.pos_tag([i for i in processedQuery if i])
-            parsed = [word for word,pos in tag if (pos == 'NN' or pos == 'NNP' or pos == 'NNS' or pos == 'JJ' or pos == 'VB')]
-            return parsed
+    #     ##part-of-speeching
+    #     def posTagging(processedQuery):
+    #         tag = nltk.pos_tag([i for i in processedQuery if i])
+    #         parsed = [word for word,pos in tag if (pos == 'NN' or pos == 'NNP' or pos == 'NNS' or pos == 'JJ' or pos == 'VB')]
+    #         return parsed
 
-        processedQuery = removePunct(query)
-        processedQuery = tokenize(processedQuery)
-        processedQuery = removeStopword(processedQuery)
-        processedQuery = stemmer(processedQuery)
-        processedQuery = lemmatizing(processedQuery)
-        processedQuery = posTagging(processedQuery)
-        return processedQuery
+    #     processedQuery = removePunct(query)
+    #     processedQuery = tokenize(processedQuery)
+    #     processedQuery = removeStopword(processedQuery)
+    #     processedQuery = stemmer(processedQuery)
+    #     processedQuery = lemmatizing(processedQuery)
+    #     processedQuery = posTagging(processedQuery)
+    #     return processedQuery
 
     ##end of preProcess function
 
     TOP_K = 5 # get top 5 most relevant questions
 
-    with open('vectors.pkl', 'rb') as f:
+    dirname = os.path.dirname(os.path.abspath(__file__))
+    pkl_file = os.path.join(dirname, "vectors.pkl")
+    joblib_file = os.path.join(dirname, "vectorizer.joblib")
+    with open(pkl_file, "rb") as f:
         tfidf_matrix, ids = pickle.load(f)
-    tfidf_vectorizer = joblib.load('vectorizer.joblib')
+    tfidf_vectorizer = joblib.load(joblib_file)
 
     query = preProcess(test_query)
     cosine_similarities = cosine_similarity(tfidf_matrix, tfidf_vectorizer.transform([' '.join(query)])).reshape(-1)
     cosine_similarities = cosine_similarities[cosine_similarities > 0.0]
+    print("type of cosine_similarities: " + str(type(cosine_similarities)))
     if cosine_similarities.tolist():
-        raise Exception('No similar questions found!!')
+        # raise Exception('No similar questions found!!')
+        return redirect(url_for("questions_bp.get_recent_questions",
+                                message="No similar questions found."), code=302)
     top_k_max_indices = cosine_similarities.argsort()[-TOP_K:][::-1]
     top_k_question_ids = np.array(ids)[top_k_max_indices] # top_k_question_ids is a list of integers
     
@@ -483,8 +490,9 @@ def train_model():
 # function to preprocess a string query for NLP
 def preProcess(query):             
              
-    ##removing punctation 
+    ##removing punctuation 
     def removePunct(non_punctuation):
+        print("non_punctuation: " + str(non_punctuation))
         non_punctuation = "".join([char for char in query if char not in string.punctuation]) ##if character not part of the string.punctuation list store as prossedData 
         return non_punctuation  
 
@@ -517,6 +525,7 @@ def preProcess(query):
         parsed = [word for word,pos in tag if (pos == 'NN' or pos == 'NNP' or pos == 'NNS' or pos == 'JJ' or pos == 'VB')]
         return parsed
 
+    print("query: " + str(query))
     processedQuery = removePunct(query)
     processedQuery = tokenize(processedQuery)
     processedQuery = removeStopword(processedQuery)
