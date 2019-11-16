@@ -39,7 +39,8 @@ def login():
                 "success": True,
                 "user_id": current_user.user_id
             }
-        return jsonify(response), 200, headers
+        # return jsonify(response), 200, headers
+        return redirect(url_for("questions_bp.get_faqs"))
 
     # POST: Log in user and take them to FAQs page
     if request.method == "POST":
@@ -49,7 +50,7 @@ def login():
 
         # validate login attempt
         user = User.query.filter_by(username=username).first()
-        print("User hashed password in db: " + str(user.password))
+        
         if user:            
             if check_password_hash(user.password, password):
             # if User.check_password(password):
@@ -61,8 +62,7 @@ def login():
                     "success": True,
                     "user_id": user.user_id
                 }
-                return jsonify(response), 200, headers
-        print("Invalid username or password.") # SEND THIS MESSAGE IN JSON TO FRONTEND
+                return jsonify(response), 200, headers      
         # return redirect(url_for("auth_bp.login"))
 
         response = {
