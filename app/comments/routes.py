@@ -55,14 +55,13 @@ def add_comment():
         return redirect(url_for("questions_bp.get_recent_questions", 
                                 user_id=current_user.user_id, 
                                 username=current_user.username,
-                                message="Comment successfully created."), code=200)
+                                message="Comment successfully created."), code=302)
 
-    # if there is missing information
-    # return make_response(f"Unable to create a comment due to missing information!", 400) 
+    # if there is missing information    
     return redirect(url_for("questions_bp.get_recent_questions", 
                             user_id=current_user.user_id, 
                             username=current_user.username,
-                            message="Unable to create comment due to missing information."), code=400)
+                            message="Unable to create comment due to missing information."), code=302)
 
 
 @comments_bp.route('/get_comments', methods=['GET'])
@@ -131,14 +130,13 @@ def update_comment():
         return redirect(url_for("questions_bp.get_recent_questions", 
                                 user_id=current_user.user_id, 
                                 username=current_user.username,
-                                message="Comment successfully updated."), code=200)
+                                message="Comment successfully updated."), code=302)
     
-    # if one of the variables is missing
-    # return make_response(f"Unable to update comments due to missing information!", 400)
+    # if one of the variables is missing    
     return redirect(url_for("questions_bp.get_recent_questions", 
                             user_id=current_user.user_id, 
                             username=current_user.username,
-                            message="Unable to update comments due to missing information."), code=400)
+                            message="Unable to update comments due to missing information."), code=302)
 
 
 @comments_bp.route('/delete_comment', methods=['DELETE'])
