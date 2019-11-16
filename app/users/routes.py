@@ -1,6 +1,7 @@
 # users/routes.py
 from flask import Blueprint, request, make_response, jsonify
 from flask import current_app as app
+from flask_login import current_user
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from ..models import User
@@ -31,7 +32,7 @@ def add_user():
 
         # check if a user with this username or email exists already
         existing_user = User.query.filter(User.username == username or User.email == email).first()
-        if existing_user:            
+        if existing_user:
             response = {
                 "message": f"{username} ({email}) already exists!",
                 "success": False
@@ -46,16 +47,16 @@ def add_user():
                         date_created=datetime.now()) # create an instance of the User class
         db.session.add(new_user) # adds a new user to the database
         db.session.commit() # commit all changes to the database
-    
+
     response = {
         "message": f"{new_user} successfully created!",
         "success": True
     }
-    return jsonify(response), 200, headers    
+    return jsonify(response), 200, headers
 
 
 @users_bp.route("/get_user_info", methods=["GET"])
-# @login_required
+@login_required
 def get_user_info():
     """Get user information."""
 
@@ -73,13 +74,13 @@ def get_user_info():
         # construct response
         response = []
         response.append({
-            "user_id": user.id,                
+            "user_id": user.user_id,
             "user_first_name": user.first_name,
             "user_last_name": user.last_name,
             "user_username": user.username,
             "user_email": user.email,
             "user_date_created": user.date_created
-        })        
+        })
 
         return jsonify(response), 200, headers
 
@@ -93,7 +94,7 @@ def get_user_info():
 
 
 @users_bp.route("/delete_user", methods=["DELETE"])
-# @login_required
+@login_required
 def delete_user():
     """Delete user from database."""
 
@@ -106,16 +107,16 @@ def delete_user():
     # delete user if user_id is found
     if user_id:
         user = User.query.get(user_id)
-        db.session.delete(user)    
-        db.session.commit()    
+        db.session.delete(user)
+        db.session.commit()
 
         response = {
             "message": f"{user} successfully deleted.",
             "success": True
         }
-        
+
         return jsonify(response), 200, headers
-    
+
     # user with user_id does not exist in the database
     response = {
         "message": f"User with user_id {user_id} does not exist in the database. Unable to delete.",
@@ -126,7 +127,7 @@ def delete_user():
 
 
 @users_bp.route("/update_user", methods=["PUT"])
-# @login_required
+@login_required
 def update_user():
     """Update details of a user."""
 
@@ -143,16 +144,25 @@ def update_user():
 
     # prepare headers for response
     headers = {"Content-Type": "application/json"}
+    
+    # only allow current user to allow their own profile    
+    if user_id != current_user.user_id:
+        response = {
+            "message": f"You are not authorized to update that user profile. Unable to update.",
+            "success": False
+        }
 
+        return jsonify(response), 400, headers
+    
     # update user information is user_id is found
     if user:
 
         # get details about current user in database
         curr_username = user.username
-        curr_email = user.email        
+        curr_email = user.email
 
         # make sure username doesn't already exist in database (excluding user's current username)
-        # if username != curr_username and User.query.filter_by(username=username).count() > 0:            
+        # if username != curr_username and User.query.filter_by(username=username).count() > 0:
         #     response = {
         #         "message": f"Unable to update user. Username \"{username}\" is already taken.",
         #         "success": False
@@ -174,28 +184,27 @@ def update_user():
             user.first_name = first_name
         if len(last_name) != 0 and last_name is not None:
             print("Updating last name...")
-            user.last_name = last_name    
+            user.last_name = last_name
         if len(username) != 0 and username is not None:
             print("Updating username...")
-            user.username = username    
+            user.username = username
         if len(email) != 0 and email is not None: # add email format verification here or in client-side code?
             print("Updating email...")
             user.email = email
         if len(password) != 0 and password is not None:
             print("Updating password...")
             user.password = generate_password_hash(password)
-        
-        # update database entry     
-        print("db.session: " + str(db.session))   
+
+        # update database entry
         db.session.commit()
-        
+
         # return make_response(f"{user} successfully updated.", 200)
         response = {
             "message": f"{user} successfully updated.",
             "success": True
         }
         return jsonify(response), 200, headers
-    
+
     # user with user_id does not exist in the database
     response = {
         "message": f"User with user_id {user_id} does not exist in the database. Unable to update.",

@@ -23,6 +23,9 @@ def login():
     # return jsonify(response), 200
     ################### USE FOR FRONTEND TESTING PURPOSES ######################
 
+    # get parameters if given
+    message = request.args.get("message")
+
     # bypass login page if user is already logged in
     print("current_user: " + str(current_user))
     print("Is current user authenticated? " + str(current_user.is_authenticated))
@@ -86,7 +89,7 @@ def login():
 def logout_page():
     """User logout logic."""
     logout_user()
-    return redirect(url_for("auth_bp.login"), code=200)
+    return redirect(url_for("auth_bp.login"), code=302)
 
 
 @login_manager.user_loader
@@ -107,46 +110,41 @@ def load_user(user_id):
 
 @login_manager.unauthorized_handler
 def unauthorized():
-    """Redirect unauthorized users to login page."""
-    print("You must be logged in to view that page.") # SEND THIS MESSAGE IN JSON TO FRONTEND
-    # response = {
-    #     "message": "You must be logged in to view that page.",
-    #     "user_id": "1"
-    # }
-    # return jsonify(response), 200
-    return redirect(url_for("auth_bp.login"))
+    """Redirect unauthorized users to login page."""    
+    return redirect(url_for("auth_bp.login", 
+                    message="You must be logged in to view that page."),
+                    code=302)
 
 
-@auth_bp.route("/signup", methods=["GET", "POST"])
-def signup():
-    """User signup page."""
-    signup_form = SignupForm(request.form)
-    # POST: Sign up user and take them to the login page.
-    if request.method == "POST":
-        if signup_form.validate():
-            # get form fields
-            firstname = request.form.get("firstname")
-            lastname = request.form.get("lastname")
-            username = request.form.get("username")
-            email = request.form.get("email")
-            password = request.form.get("password")
+# @auth_bp.route("/signup", methods=["GET", "POST"])
+# def signup():
+#     """User signup page."""    
+#     # POST: Sign up user and take them to the login page.
+#     if request.method == "POST":
+#         if signup_form.validate():
+#             # get form fields
+#             firstname = request.form.get("firstname")
+#             lastname = request.form.get("lastname")
+#             username = request.form.get("username")
+#             email = request.form.get("email")
+#             password = request.form.get("password")
 
-            # check if an account with this email exists already
-            existing_user = User.query.filter_by(email=email).first()
+#             # check if an account with this email exists already
+#             existing_user = User.query.filter_by(email=email).first()
 
-            # create user if no account with this username/email exists already
-            if existing_user is None:
-                new_user = User(firstname=firstname,
-                            lastname=lastname,
-                            username=username,
-                            email=email,
-                            password=generate_password_hash(password, method="sha256")
-                        )
-                db.session.add(new_user)
-                db.session.commit()
-                return redirect(url_for("auth_bp.login"))
-            print("A user already exists with that username or email.") # SEND THIS MESSAGE IN JSON TO FRONTEND
-            return redirect(url_for("auth_bp.signup"))
+#             # create user if no account with this username/email exists already
+#             if existing_user is None:
+#                 new_user = User(firstname=firstname,
+#                             lastname=lastname,
+#                             username=username,
+#                             email=email,
+#                             password=generate_password_hash(password, method="sha256")
+#                         )
+#                 db.session.add(new_user)
+#                 db.session.commit()
+#                 return redirect(url_for("auth_bp.login"))
+#             print("A user already exists with that username or email.") # SEND THIS MESSAGE IN JSON TO FRONTEND
+#             return redirect(url_for("auth_bp.signup"))
 
-    # GET: Serve registration page.
-    return redirect(url_for("auth_bp.signup"))
+#     # GET: Serve registration page.
+#     return redirect(url_for("auth_bp.signup"))
