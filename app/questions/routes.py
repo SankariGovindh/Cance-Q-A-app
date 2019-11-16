@@ -150,6 +150,7 @@ def get_recent_questions():
 
         # add question data into response
         response.append({
+            "user_id": us
             "id": question.question_id,
             "question_user_id": question.user_id,
             "question_username": q_username,
@@ -306,3 +307,10 @@ def get_question_history():
 
         return jsonify(response), 200, headers    
     return make_response(f"Unable to get questions due to missing user_id!", 400)
+
+
+@questions_bp.route("/search", methods=["GET"])
+# @login_required
+def search():
+    # insert NLP here
+    query = request.args.get("query")
