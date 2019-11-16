@@ -202,7 +202,7 @@ def update_question():
 
 
 @questions_bp.route("/get_question_history", methods=["GET"])
-# @login_required
+@login_required
 def get_question_history():
     """Return a JSON object of all the questions asked by the user with user_id"""
 
