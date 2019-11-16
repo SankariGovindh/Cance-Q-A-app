@@ -1,11 +1,13 @@
-from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
-import pickle
-import joblib
-import nltk
-import re 
-import string 
+import mysql.connector 
+import numpy as np 
+import nltk, scipy
+import string
+import re
+import sklearn
+from sklearn.feature_extraction.text import TfidfVectorizer
 import math 
+import json, pickle
+import joblib
 
 def preProcess(query):             
              
@@ -53,16 +55,43 @@ def preProcess(query):
 
 ##end of preProcess function
 
-TOP_K = 5
+content, ids = [], []
 
-with open('vectors.pkl', 'rb') as f:
-    tfidf_matrix, ids = pickle.load(f)
-tfidf_vectorizer = joblib.load('vectorizer.joblib')
+##connecting to a MySQL database 
+db = mysql.connector.connect(host="inventory-1.cs45dfwrhl7w.us-west-1.rds.amazonaws.com",
+                     user="administrator",
+                     passwd="Cancerbase2019",
+                     db="inventory")
 
-query = preProcess(test_query)
-cosine_similarities = cosine_similarity(tfidf_matrix, tfidf_vectorizer.transform([' '.join(query)])).reshape(-1)
-cosine_similarities = cosine_similarities[cosine_similarities > 0.0]
-if cosine_similarities.tolist():
-    raise Exception('No similar questions found!!')
-top_k_max_indices = cosine_similarities.argsort()[-TOP_K:][::-1]
-top_k_question_ids = np.array(ids)[top_k_max_indices]
+cursor = db.cursor()
+
+##performing cosine similarity between the user input query and returning the question index 
+test_query = "Does anyone know anything that will help with appetite?"
+
+
+##querying all the questions from the table 
+cursor.execute("SELECT content, question_id FROM question")
+
+
+##reading data from database 
+for question, question_id in cursor:
+    query = question
+    content.append(preProcess(query))
+    ids.append(question_id)
+    
+
+##passing the content list to TFIDF Vector to create vectors 
+def tfidfVectorizer(content, ids): 
+
+    content = [' '.join(q) for q in content]
+
+    tfidf_vectorizer = TfidfVectorizer()
+    tfidf_matrix = tfidf_vectorizer.fit_transform(content)
+
+    joblib.dump(tfidf_vectorizer, 'vectorizer.joblib')
+    with open('vectors.pkl', 'wb') as f:
+        pickle.dump([tfidf_matrix, ids], f)
+        
+##calling the tfidfcalc function to calculate the TFIDF vector values for the questions in the database 
+tfidfVectorizer(content, ids)
+
