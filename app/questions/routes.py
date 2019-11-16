@@ -408,15 +408,16 @@ def search():
     cosine_similarities = cosine_similarity(tfidf_matrix, tfidf_vectorizer.transform([' '.join(query)])).reshape(-1)
     cosine_similarities = cosine_similarities[cosine_similarities > 0.0]
     print("type of cosine_similarities: " + str(type(cosine_similarities)))
-    if cosine_similarities.tolist():
+    if not cosine_similarities.tolist():
         # raise Exception('No similar questions found!!')
         return redirect(url_for("questions_bp.get_recent_questions",
                                 message="No similar questions found."), code=302)
     top_k_max_indices = cosine_similarities.argsort()[-TOP_K:][::-1]
-    top_k_question_ids = np.array(ids)[top_k_max_indices] # top_k_question_ids is a list of integers
+    top_k_question_ids = np.array(ids)[top_k_max_indices].tolist() # top_k_question_ids is a list of integers
     
     # generate response object containing the top k most relevant questions and their comments
-    response = {}
+    response = []
+    print("type of top_k_question_ids: " + str(type(top_k_question_ids)))
     for question_id in top_k_question_ids:
 
         question = Question.query.filter_by(question_id=question_id).first()
@@ -439,14 +440,14 @@ def search():
         for comment in comments:
             # check if the comment is from Facebook group
             if comment.user_id == 0:
-                comment_username = "Facebook"
+                comment_username.append("Facebook")
             else:
                 # get the user for that comment
                 comment_user = User.query.filter_by(user_id=comment.user_id).first()
-                comment_username = comment_user.username
+                comment_username.append(comment_user.username)
 
             comment_user_id.append(comment.user_id)
-            comment_username.append(comment_username)
+            # comment_username.append(comment_username)
             comment_content.append(comment.content)
             comment_source.append(comment.source)
             comment_is_anon.append(comment.is_anonymous)
@@ -471,10 +472,11 @@ def search():
             "comment_username": comment_username
         })    
         
-    return redirect(url_for("questions_bp.get_recent_questions", 
-                            user_id=current_user.user_id, 
-                            username=current_user.username,
-                            message="Most relevant questions retrieved."), code=302)
+    return jsonify(response), 200
+    # return redirect(url_for("questions_bp.get_recent_questions", 
+    #                         user_id=current_user.user_id, 
+    #                         username=current_user.username,
+    #                         message="Most relevant questions retrieved."), code=302)
 
 
 @questions_bp.route("/train_model", methods=["GET"])
