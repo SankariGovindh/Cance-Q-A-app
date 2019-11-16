@@ -313,3 +313,4 @@ def get_question_history():
 # @login_required
 def search():
     # insert NLP here
+    query = request.args.get("query")
