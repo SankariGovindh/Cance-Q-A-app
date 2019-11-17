@@ -5,11 +5,18 @@ import csv
 import mysql.connector
 from datetime import datetime
 
+# conn = mysql.connector.connect(
+#     host="inventory-1.cs45dfwrhl7w.us-west-1.rds.amazonaws.com",
+#     user="administrator",
+#     passwd="Cancerbase2019",
+#     database="inventory",
+#     port=3306
+# )
 conn = mysql.connector.connect(
-    host="localhost",
-    user="justinho",
-    passwd="GRIDS",
-    database="inventory",
+    host="side-effects-db-dev.cmadu6cqvrn3.us-west-2.rds.amazonaws.com",
+    user="admin",
+    passwd="hN0zkQmoBic48VdjIBCT",
+    database="sideffects",
     port=3306
 )
 
@@ -38,8 +45,8 @@ with open(filename) as csv_file:
 
                 # add question if it's not already in the database                
                 if count == 0:
-                    sql = "INSERT INTO question (content, date_created, date_updated, is_anonymous, source, num_comments) VALUES (%s, %s, %s, %s, %s, %s)"
-                    val = (question_content, date_created, date_created, 1, source, 1)
+                    sql = "INSERT INTO question (user_id, title, content, date_created, date_updated, is_anonymous, source, num_comments) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+                    val = (0, "", question_content, date_created, date_created, 1, source, 0) # use 0 for default user_id and "" for title
                     cursor.execute(sql, val)
                     conn.commit()
 
@@ -53,8 +60,8 @@ with open(filename) as csv_file:
                 
                 # add comment if it's not already in the database
                 if count == 0:                    
-                    sql = "INSERT INTO comment (question_id, content, date_created, date_updated, is_anonymous, source) VALUES (%s, %s, %s, %s, %s, %s)"
-                    val = (question_id, comment, date_created, date_created, 1, source)
+                    sql = "INSERT INTO comment (user_id, question_id, content, date_created, date_updated, is_anonymous, source) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+                    val = (0, question_id, comment, date_created, date_created, 1, source) # use 0 as default user_id (Facebook posts)
                     cursor.execute(sql, val)
                     conn.commit()          
 
