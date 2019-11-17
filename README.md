@@ -22,7 +22,7 @@ python wsgi.py
 1) Read the user string passed as parameter via the API call 
 2) Pre-process the query string and find the tfidf vector 
 3) TFIDF values for the questions that are in the database is already pre-calculated and dumped to a pkl file
-4) Cosine Similiarity is found between the user input's TFIDF vector against all the TFIDF vectors present in the JSON file. 
+4) Cosine Similarity is found between the user input's TFIDF vector against all the TFIDF vectors present in the JSON file. 
 5) Question ID with the highest match is returned back to an internal function, which then pull the corresponding links and comments from the database and sends back to the frontend app. 
 
 TrainingCode.py - To be executed every time there is a modification in the database. The code generates a pkl file containing the TFIDF matrix, which is then read in the NLPCode and similarity is performed. 
@@ -57,4 +57,12 @@ Instructions:
 If you are unable to connect to the MySQL DB instance, it is likely that the VPC (virtual private cloud) is restricting access to your IP address.
 - Check out https://medium.com/@ryanzhou7/connecting-a-mysql-workbench-to-amazon-web-services-relational-database-service-36ae1f23d424 to troubleshoot.
     (1) Check that under "Network & Security", "Public accessibility" is set to "Yes" so that you can access from your IP address.
-        - NOTE: We will need to remove public accessibility once we deploy to production (and do other VPC-related stuff).    
+        - NOTE: We will need to remove public accessibility once we deploy to production (and do other VPC-related stuff).   
+
+### Migrating raw data into MySQL
+1. Download 1st sheet of the "Raw Data" Google Sheets file in Google Drive as a CSV file and save the file in the /datadump/ directory.
+2. In the /datadump/ directory, run 
+```
+python csv_to_mysql.py
+```
+3. The database should be updated. In the terminal, you should see the total number of questions and comments that now exist in the database.
