@@ -345,58 +345,12 @@ def get_question_history():
 
 
 @questions_bp.route("/search", methods=["GET"])
-# @login_required
+@login_required
 def search():    
-    test_query = request.args.get("query")
-
-    # def preProcess(query):
-
-    #     ##removing punctuation
-    #     def removePunct(non_punctuation):
-    #         non_punctuation = "".join([char for char in query if char not in string.punctuation]) ##if character not part of the string.punctuation list store as prossedData
-    #         return non_punctuation
-
-    #     ##tokenizing as separate words
-    #     def tokenize(tokens):
-    #         tokens = re.split('\W+',processedQuery) ##tokenizing every word and separating the same using commas
-    #         return tokens
-
-    #     ##removing stopwords
-    #     def removeStopword(cleanData):
-    #         stopwords = nltk.corpus.stopwords.words('english') ##storing all the stopwords for the English language
-    #         cleanData = [word for word in cleanData if word not in stopwords]
-    #         return cleanData
-
-    #     ##stemming
-    #     def stemmer(currentData):
-    #         stemming = nltk.PorterStemmer()
-    #         stemmedData = [stemming.stem(word) for word in currentData]
-    #         return stemmedData
-
-    #     ##lemmatizing
-    #     def lemmatizing(currentData):
-    #         lemma = nltk.WordNetLemmatizer()
-    #         lemData = [lemma.lemmatize(word) for word in currentData]
-    #         return lemData
-
-    #     ##part-of-speeching
-    #     def posTagging(processedQuery):
-    #         tag = nltk.pos_tag([i for i in processedQuery if i])
-    #         parsed = [word for word,pos in tag if (pos == 'NN' or pos == 'NNP' or pos == 'NNS' or pos == 'JJ' or pos == 'VB')]
-    #         return parsed
-
-    #     processedQuery = removePunct(query)
-    #     processedQuery = tokenize(processedQuery)
-    #     processedQuery = removeStopword(processedQuery)
-    #     processedQuery = stemmer(processedQuery)
-    #     processedQuery = lemmatizing(processedQuery)
-    #     processedQuery = posTagging(processedQuery)
-    #     return processedQuery
-
-    ##end of preProcess function
-
+    query = request.args.get("query")    
     TOP_K = 5 # get top 5 most relevant questions
 
+    # get file path of .pkl and .joblib files
     dirname = os.path.dirname(os.path.abspath(__file__))
     pkl_file = os.path.join(dirname, "vectors.pkl")
     joblib_file = os.path.join(dirname, "vectorizer.joblib")
@@ -404,10 +358,10 @@ def search():
         tfidf_matrix, ids = pickle.load(f)
     tfidf_vectorizer = joblib.load(joblib_file)
 
-    query = preProcess(test_query)
+    # preprocess query
+    query = preProcess(query)
     cosine_similarities = cosine_similarity(tfidf_matrix, tfidf_vectorizer.transform([' '.join(query)])).reshape(-1)
-    cosine_similarities = cosine_similarities[cosine_similarities > 0.0]
-    print("type of cosine_similarities: " + str(type(cosine_similarities)))
+    cosine_similarities = cosine_similarities[cosine_similarities > 0.0]    
     if not cosine_similarities.tolist():
         # raise Exception('No similar questions found!!')
         return redirect(url_for("questions_bp.get_recent_questions",
@@ -416,18 +370,13 @@ def search():
     top_k_question_ids = np.array(ids)[top_k_max_indices].tolist() # top_k_question_ids is a list of integers
     
     # generate response object containing the top k most relevant questions and their comments
-    response = []
-    print("type of top_k_question_ids: " + str(type(top_k_question_ids)))
+    response = []    
     for question_id in top_k_question_ids:
 
         question = Question.query.filter_by(question_id=question_id).first()
 
-        # check if the question is from Facebook
-        if question.user_id == 0:
-            question_username = "Facebook"
-        else:
-            question_user = User.query.filter_by(user_id=question.user_id).first()
-            question_username = question_user.username
+        question_user = User.query.filter_by(user_id=question.user_id).first()
+        question_username = question_user.username
 
         # get comments associated with the question_id
         comments = Comment.query.filter_by(question_id=question_id).all()
@@ -493,8 +442,7 @@ def train_model():
 def preProcess(query):             
              
     ##removing punctuation 
-    def removePunct(non_punctuation):
-        print("non_punctuation: " + str(non_punctuation))
+    def removePunct(non_punctuation):        
         non_punctuation = "".join([char for char in query if char not in string.punctuation]) ##if character not part of the string.punctuation list store as prossedData 
         return non_punctuation  
 
@@ -526,8 +474,7 @@ def preProcess(query):
         tag = nltk.pos_tag([i for i in processedQuery if i]) 
         parsed = [word for word,pos in tag if (pos == 'NN' or pos == 'NNP' or pos == 'NNS' or pos == 'JJ' or pos == 'VB')]
         return parsed
-
-    print("query: " + str(query))
+    
     processedQuery = removePunct(query)
     processedQuery = tokenize(processedQuery)
     processedQuery = removeStopword(processedQuery)
