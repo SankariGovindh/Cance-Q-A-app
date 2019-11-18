@@ -24,6 +24,8 @@ import json
 import pickle
 import os
 
+nltk.download('stopwords')
+
 # set up a blueprint
 questions_bp = Blueprint("questions_bp", __name__)
 
@@ -351,17 +353,11 @@ def get_question_history():
                             message="Invalid user id. Unable to get questions."), code=302)
 
 
-<<<<<<< HEAD
 @questions_bp.route("/search", methods=["POST"])
-# @login_required
-=======
-@questions_bp.route("/search", methods=["GET"])
 @login_required
->>>>>>> 92f09da8d03b40189867015163892c01c8fff46b
 def search():    
     query = request.args.get("query")    
     TOP_K = 5 # get top 5 most relevant questions
-
     # get file path of .pkl and .joblib files
     dirname = os.path.dirname(os.path.abspath(__file__))
     pkl_file = os.path.join(dirname, "vectors.pkl")
@@ -416,6 +412,8 @@ def search():
 
         # add question data into response
         response.append({
+            "username": "",
+            "user_id": "",
             "id": question.question_id,
             "question_user_id": question.user_id,
             "question_username": question_username,
