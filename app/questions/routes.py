@@ -251,7 +251,7 @@ def update_question():
                     message="Unable to update the question due to missing information."), code=302)
 
 
-@questions_bp.route("/get_question_history", methods=["GET"])
+@questions_bp.route("/get_question_history", methods=["POST"])
 @login_required
 def get_question_history():
     """Return a JSON object of all the questions asked by the user with user_id"""
@@ -265,22 +265,27 @@ def get_question_history():
 
         # construct response
         response = []
+
         if len(all_question) == 0:
-            response = {
-                "id": [],
-                "question_user_id": [],
-                "question_title": [],
-                "question_date_updated": [],
-                "question_source": [],
-                "question_content": [],
-                "question_num_comments": [],
-                "question_is_anon": [],
+            response = [{
+                "username": "",
+                "user_id": user_id,
+                "question_username": "",
+                "comment_username": [],
+                "id": 0,
+                "question_user_id": int(user_id),
+                "question_title": "",
+                "question_date_updated": "",
+                "question_source": "",
+                "question_content": "",
+                "question_num_comments": 0,
+                "question_is_anon": bool(0),
                 "comment_content": [],
                 "comment_source": [],
                 "comment_date_updated": [],
                 "comment_is_anon": [],
                 "comment_user_id": []
-            }
+            }]
         for question in all_question:
 
             question_id = question.question_id
@@ -317,6 +322,8 @@ def get_question_history():
 
             # add question data into response
             response.append({
+                "username": "",
+                "user_id": user_id,
                 "id": question.question_id,
                 "question_user_id": question.user_id,
                 "question_username": q_username,
@@ -344,7 +351,7 @@ def get_question_history():
                             message="Invalid user id. Unable to get questions."), code=302)
 
 
-@questions_bp.route("/search", methods=["GET"])
+@questions_bp.route("/search", methods=["POST"])
 # @login_required
 def search():    
     test_query = request.args.get("query")
