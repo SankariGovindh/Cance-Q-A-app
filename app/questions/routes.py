@@ -415,7 +415,7 @@ def search():
         # add question data into response
         response.append({
             "username": "",
-            "user_id": "",
+            "user_id": "0",
             "id": question.question_id,
             "question_user_id": question.user_id,
             "question_username": question_username,
