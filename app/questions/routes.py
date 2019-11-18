@@ -24,7 +24,9 @@ import json
 import pickle
 import os
 
-nltk.download('stopwords')
+nltk.download("averaged_perceptron_tagger")
+nltk.download("stopwords")
+nltk.downlaod("wordnet")
 
 # set up a blueprint
 questions_bp = Blueprint("questions_bp", __name__)
