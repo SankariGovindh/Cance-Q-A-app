@@ -26,7 +26,7 @@ import os
 
 nltk.download("averaged_perceptron_tagger")
 nltk.download("stopwords")
-nltk.downlaod("wordnet")
+nltk.download("wordnet")
 
 # set up a blueprint
 questions_bp = Blueprint("questions_bp", __name__)
@@ -48,7 +48,7 @@ def add_question():
     title = request.args.get("title")
     content = request.args.get("content")
     is_anon = int(request.args.get("is_anonymous"))
-    source = request.args.get("source")    
+    source = request.args.get("source")
 
     if user_id is not None and content is not None and is_anon is not None:
 
