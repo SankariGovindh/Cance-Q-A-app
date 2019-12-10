@@ -4,13 +4,16 @@
 ## Table of Contents
 1. [Points of Contact](#poc)
 2. [Getting Started](#getting-started)
-3. [EC2 Instance](#ec2)
-4. [Running Locally](#running-locally)
-5. [NLP](#nlp)
-6. [Testing Routes](#testing-routes)
-7. [Connecting to the MySQL DB instance on Amazon RDS ](#connect-rds)
-8. [Migrating Raw Data into MySQL](#migrate-data)
-9. [Tech Stack](#tech-stack)
+  - [EC2 Instance](#ec2)
+  - [Running Locally](#running-locally)
+  - [NLP](#nlp)
+  - [Testing Routes](#testing-routes)
+  - [Connecting to the MySQL DB instance on Amazon RDS ](#connect-rds)
+  - [Migrating Raw Data into MySQL](#migrate-data)
+  - [Tech Stack](#tech-stack)
+3. [Deep Dive](#deep-dive)
+  - [Frontend](#frontend)
+  - [Backend](#backend)        
 
 <a name="poc"></a>
 ### Points of Contact
@@ -103,3 +106,11 @@ python csv_to_mysql.py
     - Flask
     - SQLAlchemy
     - Nginx (to route traffic to port 80 of our EC2 instance)
+
+<a name="deep-dive"></a>
+## Deep Dive
+<a name="frontend"></a>
+### Frontend
+
+<a name="backend"></a>
+### Backend
