@@ -451,7 +451,8 @@ def train_model():
     """Trains the model that the 'search' function uses to find the most relevant
     questions for a user's search query.
     """
-
+    # TODO
+    
     return redirect(url_for("questions_bp.get_recent_questions",
                             user_id=current_user.user_id,
                             username=current_user.username,
