@@ -452,7 +452,7 @@ def train_model():
     questions for a user's search query.
     """
     # TODO
-    
+
     return redirect(url_for("questions_bp.get_recent_questions",
                             user_id=current_user.user_id,
                             username=current_user.username,
@@ -465,7 +465,7 @@ def preProcess(query):
 
     Args:
         query (string): the string query to preprocess
-    
+
     Returns:
         the processed string query
     """
