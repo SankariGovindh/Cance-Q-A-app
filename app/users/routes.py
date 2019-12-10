@@ -16,9 +16,13 @@ users_bp = Blueprint('users_bp', __name__)
 
 @users_bp.route("/add_user", methods=["POST"])
 def add_user():
-    """Create a user."""
+    """Create a user.
 
-    # get arguments
+    Returns:
+        A JSON response containing a success/failure message.
+    """
+
+    # get query parameters
     first_name = request.args.get("first_name")
     last_name = request.args.get("last_name")
     username = request.args.get("username")
@@ -44,9 +48,9 @@ def add_user():
                         username=username,
                         password=password,
                         email=email,
-                        date_created=datetime.now()) # create an instance of the User class
-        db.session.add(new_user) # adds a new user to the database
-        db.session.commit() # commit all changes to the database
+                        date_created=datetime.now())
+        db.session.add(new_user)
+        db.session.commit()
 
     response = {
         "message": f"{new_user} successfully created!",
@@ -58,12 +62,15 @@ def add_user():
 @users_bp.route("/get_user_info", methods=["GET"])
 @login_required
 def get_user_info():
-    """Get user information."""
+    """Returns a JSON response containing a user's information.
 
-    # get arguments
-    user_id = request.args.get("user_id")
+    Returns:
+        On success, returns a JSON response containing a user's information. On
+        failure, returns a JSON response containing an error message.
+    """
 
-    # get user info
+    # get query parameters
+    user_id = request.args.get("user_id")    
     user = User.query.get(user_id)
 
     # prepare headers for response
@@ -96,9 +103,13 @@ def get_user_info():
 @users_bp.route("/delete_user", methods=["DELETE"])
 @login_required
 def delete_user():
-    """Delete user from database."""
+    """Delete a user from database.
 
-    # get arguments
+    Returns:
+        A JSON response containing a success/failure message.
+    """
+
+    # get query parameters
     user_id = request.args.get("user_id")
 
     # prepare headers for response
@@ -129,9 +140,13 @@ def delete_user():
 @users_bp.route("/update_user", methods=["PUT"])
 @login_required
 def update_user():
-    """Update details of a user."""
+    """Update details of a user.
 
-    # get arguments
+    Returns:
+        A JSON response containing a success/failure message.
+    """
+
+    # get query parameters
     user_id = request.args.get("user_id")
     first_name = request.args.get("first_name")
     last_name = request.args.get("last_name")
@@ -159,24 +174,7 @@ def update_user():
 
         # get details about current user in database
         curr_username = user.username
-        curr_email = user.email
-
-        # make sure username doesn't already exist in database (excluding user's current username)
-        # if username != curr_username and User.query.filter_by(username=username).count() > 0:
-        #     response = {
-        #         "message": f"Unable to update user. Username \"{username}\" is already taken.",
-        #         "success": False
-        #     }
-        #     return jsonify(response), 409, headers
-
-        # make sure email don't already exist in database (excluding user's current email)
-        # if email != curr_email and User.query.filter_by(email=email).count() > 0:
-        #     # return make_response(f"Unable to update email. \"{email}\" is already associated with another account.")
-        #     response = {
-        #         "message": f"Unable to update email. \"{email}\" is already associated with another account.",
-        #         "success": False
-        #     }
-        #     return jsonify(response), 409, headers
+        curr_email = user.email        
 
         # update user details
         if len(first_name) != 0 and first_name is not None:
@@ -194,11 +192,9 @@ def update_user():
         if len(password) != 0 and password is not None:
             print("Updating password...")
             user.password = generate_password_hash(password)
-
-        # update database entry
+        
         db.session.commit()
-
-        # return make_response(f"{user} successfully updated.", 200)
+        
         response = {
             "message": f"{user} successfully updated.",
             "success": True
