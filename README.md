@@ -1,12 +1,24 @@
 # Side Effects Management
 ![](/images/backend_architecture_diagram_103019.png)
 
+## Table of Contents
+1. [Points of Contact](#poc)
+2. [Getting Started](#getting-started)
+3. [EC2 Instance](#ec2)
+4. [Running Locally](#running-locally)
+5. [NLP](#nlp)
+6. [Testing Routes](#testing-routes)
+7. [Connecting to the MySQL DB instance on Amazon RDS ](#connect-rds)
+8. [Migrating Raw Data into MySQL](#migrate-data)
+9. [Tech Stack](#tech-stack)
+
+<a name="poc"></a>
 ### Points of Contact
 - Frontend: Kevin Tran (ktran774@usc.edu)
 - Backend: Justin Ho (hojustin@usc.edu), Amy Chung (chungy@usc.edu)
 - NLP/Search: Sankari Govindarajan (sankares@usc.edu), Sangeeth Koratten (koratten@usc.edu)
 
-
+<a name="getting-started"></a>
 ## Getting Started
 ### Required Software
 1. MySQL and MySQL Workbench (https://dev.mysql.com/downloads/installer/ and https://dev.mysql.com/downloads/workbench/)
@@ -16,6 +28,7 @@
 pip3 install -r requirements.txt
 ```
 
+<a name="ec2"></a>
 ### EC2 Instance
 - ubuntu@18.237.156.136
 - Ask Kien Nguyen (kien.nguyen@usc.edu) for the .pem file
@@ -25,8 +38,8 @@ ssh -i /path/my-key-pair.pem ubuntu@18.237.156.136
 ```
 - For more information, visit https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AccessingInstancesLinux.html
 
-
-### Running locally
+<a name="running-locally"></a>
+### Running Locally
 1. Navigate to the top-level of the project directory.
 2. On the command line, type
 ```
@@ -46,7 +59,7 @@ python wsgi.py
  ```
 4. Now you should be able to test API requests via Postman and see any associated changes in MySQL workbench.
 
-
+<a name="nlp"></a>
 ### NLP - /search endpoint
 1. Read the user string passed as parameter via the API call 
 2. Pre-process the query string and find the tfidf vector 
@@ -56,12 +69,12 @@ python wsgi.py
 
 TrainingCode.py - To be executed every time there is a modification in the database. The code generates a pkl file containing the TFIDF matrix, which is then read in the NLPCode and similarity is performed. 
 
-
+<a name="testing-routes"></a>
 ### Testing Routes using Postman
 1. Open PostMan.
 2. File -> Import -> "SideEffectsApp(AWS).postman_collection"
 
-
+<a name="connect-rds"></a>
 ### Connecting to the MySQL DB instance on Amazon RDS
 Instructions:
 1. Open MySQL Workbench and navigate to the home page (MySQL Connections).
@@ -72,7 +85,7 @@ Instructions:
 6. In the "Password" field, click "Store in Vault ..." and enter "[Ask Kien Nguyen (kien.nguyen@usc.edu) for password]" (don't include quotes) as the password.
 7. Click OK to connect.
   
-
+<a name="migrate-data"></a>
 ### Migrating Raw Data into MySQL
 1. Download 1st sheet of the "Raw Data" Google Sheets file in Google Drive as a CSV file and save the file in the /datadump/ directory.
 2. In the /datadump/ directory, run 
@@ -81,7 +94,7 @@ python csv_to_mysql.py
 ```
 3. The database should be updated. In the terminal, you should see the total number of questions and comments that now exist in the database.
 
-
+<a name="tech-stack"></a>
 ### Tech Stack
 - Frontend:
     - Swift
