@@ -10,20 +10,22 @@ from .. import db, login_manager
 
 # set up a blueprint
 auth_bp = Blueprint('auth_bp', __name__)
-# assets = Environment(app)
+
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
-    """User login page."""
-    ################### USE FOR FRONTEND TESTING PURPOSES ######################
-    # response = {
-    #     "message": "Successful user login.",
-    #     "user_id": "1"
-    # }
-    # return jsonify(response), 200
-    ################### USE FOR FRONTEND TESTING PURPOSES ######################
+    """User login page.
 
-    # get parameters if given
+    Upon GET request, the user is taken to the login page if they are not 
+    already logged in. Otherwise, the user is taken to the 'search'/home page.
+    Upon POST request, the user is logged in if their credentials are authenticated.
+    Otherwise, an error message is returned.
+
+    Returns:
+        A JSON response of success/failure of logging in.
+    """
+
+    # get query parameters
     message = request.args.get("message")
 
     # bypass login page if user is already logged in
@@ -39,8 +41,7 @@ def login():
                 "message": "User was already logged in.",
                 "success": True,
                 "user_id": current_user.user_id
-            }
-        # return jsonify(response), 200, headers        
+            }         
         return redirect(url_for("questions_bp.get_recent_questions", 
                                 user_id=current_user.user_id, 
                                 username=current_user.username), code=302)
@@ -55,16 +56,14 @@ def login():
         user = User.query.filter_by(username=username).first()
         
         if user:            
-            if check_password_hash(user.password, password):
-            # if User.check_password(password):
+            if check_password_hash(user.password, password):            
                 login_user(user)
                 next = request.args.get("next") # take users to the page that they had attempted to reach prior to logging in                
                 response = {
                     "message": "Successful login.",
                     "success": True,
                     "user_id": user.user_id
-                }
-                # return jsonify(response), 200, headers   
+                }                  
                 return redirect(url_for("questions_bp.get_recent_questions", 
                                 user_id=current_user.user_id, 
                                 username=current_user.username), code=302)        
@@ -80,8 +79,7 @@ def login():
         "message": "You have reached the login page.",
         "success": True
     }
-    return jsonify(response), 200, headers
-    # return redirect(url_for("auth_bp.login"))
+    return jsonify(response), 200, headers    
 
 
 @auth_bp.route("/logout")
@@ -114,37 +112,3 @@ def unauthorized():
     return redirect(url_for("auth_bp.login", 
                     message="You must be logged in to view that page."),
                     code=302)
-
-
-# @auth_bp.route("/signup", methods=["GET", "POST"])
-# def signup():
-#     """User signup page."""    
-#     # POST: Sign up user and take them to the login page.
-#     if request.method == "POST":
-#         if signup_form.validate():
-#             # get form fields
-#             firstname = request.form.get("firstname")
-#             lastname = request.form.get("lastname")
-#             username = request.form.get("username")
-#             email = request.form.get("email")
-#             password = request.form.get("password")
-
-#             # check if an account with this email exists already
-#             existing_user = User.query.filter_by(email=email).first()
-
-#             # create user if no account with this username/email exists already
-#             if existing_user is None:
-#                 new_user = User(firstname=firstname,
-#                             lastname=lastname,
-#                             username=username,
-#                             email=email,
-#                             password=generate_password_hash(password, method="sha256")
-#                         )
-#                 db.session.add(new_user)
-#                 db.session.commit()
-#                 return redirect(url_for("auth_bp.login"))
-#             print("A user already exists with that username or email.") # SEND THIS MESSAGE IN JSON TO FRONTEND
-#             return redirect(url_for("auth_bp.signup"))
-
-#     # GET: Serve registration page.
-#     return redirect(url_for("auth_bp.signup"))
