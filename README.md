@@ -1,6 +1,4 @@
 # Side Effects Management
-![](/images/backend_architecture_diagram_103019.png)
-
 ## Table of Contents
 1. [Points of Contact](#poc)
 2. [Getting Started](#getting-started)
@@ -109,8 +107,47 @@ python csv_to_mysql.py
 
 <a name="deep-dive"></a>
 ## Deep Dive
+![](/images/backend_architecture_diagram_103019.png)
 <a name="frontend"></a>
 ### Frontend
 
+#### Description of Files / File Structure
+- app
+  - SideEffects
+  - SideEffects.xcodeproj
+
 <a name="backend"></a>
 ### Backend
+The backend uses a Client-Server architecture model. The Python Flask web framework was used to create an ReST API. SQLAlchemy was used for its ORM (object relational mapper) to make it simple to perform CRUD (create, read, update, delete) operations with our MySQL database. The server-side code is hosted on an AWS EC2 instance, and the MySQL database is hosted on Amazon RDS. 
+
+#### Description of Files / File Structure
+- [**app**](app/) (Contains all files regarding backend development)
+  - [**auth**](app/auth/) (Contains routes related to authentication)
+    - [**routes.py**](app/auth/routes.py)
+  - [**comments**](app/comments/) (Contains routes related to the Comment class)
+    - [**routes.py**](app/comments/routes.py)
+  - [**questions**](app/questions/) (Contains routes related to the Question class)
+    - [**routes.py**](app/questions/routes.py)
+  - [**users**](app/users/) (Contains routes related to the User class)
+    - [**routes.py**](app/users/routes.py)
+  - [**__init__.py**](app/__init__.py) (Initialization script that connects all the components of the Flask app, including the SQLAlchemy and LoginManager plug-ins. Also registers all Flask blueprints to link all routes to the application.)
+  - [**.env**](app/.env) (Contains our environment variables. Make sure to update the SECRET_KEY!!!)
+  - [**config.py**](app/config.py)
+  - [**models.py**](app/models.py) (Contains the model classes for User, Question, and Comment.)
+  - [**vectorizer.joblib**](app/vectorizer.joblib) (???)
+  - [**vectors.pkl**](app/vectors.pkl) (???)
+- [**datadump**](datadump/) (Contains files regarding data migration)
+  - [**csv_to_mysql.py**](datadump/csv_to_mysql.py) (Script that takes raw_data.csv generated from the Google Spreadsheet containing all our data and populates the database with all the data. Don't worry about adding duplicate data upon successive runs of this script. It checks for duplicate data.)
+  - [**data_dump_11152019.sql**](datadump/data_dump_11152019.sql) (SQL script to create database tables, along with all data collected so far.)
+  - [**raw_data.csv**](datadump/raw_data.csv) (CSV file generated from our Google Spreadsheet. Keep column structure, or else csv_to_mysql.py script won't be able to migrate the latest data to the database.)
+- [**images**](images/) (Directory to hold architecture diagrams and other images)  
+- [**model**](model/) (Contains files related to the NLP functions used to perform the 'search' function.)
+  - [**NLPCode.py**](model/NLPCode.py) (???)
+  - [**TrainingCode.py**](model/TrainingCode.py) (???)
+- [**tests**](tests/) (Contains all tests that we've conducted so far.)
+  - [**SideEffectsApp(AWS).postman_collection.json**](test/SideEffectsApp(AWS).postman_collection.json) (Contains PostMan tests that the Fall 2019 team conducted. Import this file in Postman to execute tests.)
+- [**.gitignore**](.gitignore) (Add sensitive files to .gitignore file to prevent accidental commital of sensitive files to online repository)
+- [**README.md**](README.md) (Contains technical documentation. Project motivation and background are contained in a separate Google Doc.)
+- [**requirements.txt**](requirements.txt) (Perform 'pip3 install requirements.txt' to install all dependencies in your virtual environment to get started)
+- **side-effects-key-pair.pem** (File containing SSH key for AWS EC2 instance. Ask Kien Nguyen (kien.nguyen@usc.edu) for this file (keep this information safe!))
+- [**wsgi.py**](wsgi.py) (Entry point to start up the backend server/application. To start the backend application, go to your terminal and type in "python3 wsgi.py")
