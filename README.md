@@ -70,6 +70,8 @@ python wsgi.py
 
 TrainingCode.py - To be executed every time there is a modification in the database. The code generates a pkl file containing the TFIDF matrix, which is then read in the NLPCode and similarity is performed. 
 
+Libraries required : nltk, numpy, cosine_similarity 
+
 <a name="testing-routes"></a>
 ### Testing Routes using Postman
 1. Open PostMan.
@@ -134,16 +136,16 @@ The backend uses a Client-Server architecture model. The Python Flask web framew
   - [**.env**](app/.env) (Contains our environment variables. Make sure to update the SECRET_KEY!!!)
   - [**config.py**](app/config.py)
   - [**models.py**](app/models.py) (Contains the model classes for User, Question, and Comment.)
-  - [**vectorizer.joblib**](app/vectorizer.joblib) (???)
-  - [**vectors.pkl**](app/vectors.pkl) (???)
+  - [**vectorizer.joblib**](app/vectorizer.joblib) (Importing the file as joblib to access large arrays efficiently.)
+  - [**vectors.pkl**](app/vectors.pkl) (Pickle file containing the feature vectors for the questions in the database)
 - [**datadump**](datadump/) (Contains files regarding data migration)
   - [**csv_to_mysql.py**](datadump/csv_to_mysql.py) (Script that takes raw_data.csv generated from the Google Spreadsheet containing all our data and populates the database with all the data. Don't worry about adding duplicate data upon successive runs of this script. It checks for duplicate data.)
   - [**data_dump_11152019.sql**](datadump/data_dump_11152019.sql) (SQL script to create database tables, along with all data collected so far.)
   - [**raw_data.csv**](datadump/raw_data.csv) (CSV file generated from our Google Spreadsheet. Keep column structure, or else csv_to_mysql.py script won't be able to migrate the latest data to the database.)
 - [**images**](images/) (Directory to hold architecture diagrams and other images)  
 - [**model**](model/) (Contains files related to the NLP functions used to perform the 'search' function.)
-  - [**NLPCode.py**](model/NLPCode.py) (???)
-  - [**TrainingCode.py**](model/TrainingCode.py) (???)
+  - [**NLPCode.py**](model/NLPCode.py) (The code gets executed when there is a new query from the user.)
+  - [**TrainingCode.py**](model/TrainingCode.py) (Run the code to generate the feature vectors for the question sets that are already available.)
 - [**tests**](tests/) (Contains all tests that we've conducted so far.)
   - [**SideEffectsApp(AWS).postman_collection.json**](test/SideEffectsApp(AWS).postman_collection.json) (Contains PostMan tests that the Fall 2019 team conducted. Import this file in Postman to execute tests.)
 - [**.gitignore**](.gitignore) (Add sensitive files to .gitignore file to prevent accidental commital of sensitive files to online repository)
